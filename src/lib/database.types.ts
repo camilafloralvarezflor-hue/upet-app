@@ -50,6 +50,7 @@ export interface Business {
   lng: number | null;
   horarios: BusinessHours;
   fotos: string[];
+  servicios: string[];
   telefono: string | null;
   turnos_habilitado: boolean;
   verificado: boolean;

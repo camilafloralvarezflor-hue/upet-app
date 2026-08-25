@@ -8,4 +8,5 @@ export interface AltaFormState {
   turnosHabilitado: boolean;
   fotosLocales: string[];
   telefono: string;
+  servicios: string;
 }

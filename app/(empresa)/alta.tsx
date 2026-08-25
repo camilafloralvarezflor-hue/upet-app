@@ -13,6 +13,7 @@ import { StepContacto } from '../../src/components/alta/StepContacto';
 import type { AltaFormState } from '../../src/components/alta/types';
 import { useCreateBusiness } from '../../src/hooks/useBusiness';
 import { useSession } from '../../src/lib/auth-context';
+import { geocodeAddress } from '../../src/lib/geocode';
 import { defaultHorarios } from '../../src/lib/horarios';
 import { queryClient } from '../../src/lib/query-client';
 import { supabase } from '../../src/lib/supabase';
@@ -39,6 +40,7 @@ export default function AltaEmpresaScreen() {
     turnosHabilitado: false,
     fotosLocales: [],
     telefono: '',
+    servicios: '',
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,14 +61,22 @@ export default function AltaEmpresaScreen() {
     setError(null);
 
     try {
+      const direccion = form.direccion.trim();
+      const coords = await geocodeAddress(direccion);
+      const servicios = form.servicios
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+
       const business = await createBusiness.mutateAsync({
         rubro: form.rubro as string,
         nombre: form.nombre.trim(),
-        direccion: form.direccion.trim(),
-        lat: null,
-        lng: null,
+        direccion,
+        lat: coords?.lat ?? null,
+        lng: coords?.lng ?? null,
         horarios: form.horarios,
         fotos: [],
+        servicios,
         telefono: form.telefono.trim(),
         turnos_habilitado: form.turnosHabilitado,
       });

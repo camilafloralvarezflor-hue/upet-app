@@ -23,6 +23,12 @@ export function StepContacto({ form, onChange }: StepContactoProps) {
         placeholder="+54 9 ..."
         keyboardType="phone-pad"
       />
+      <TextField
+        label="Servicios que ofrecés (opcional, separados por coma)"
+        value={form.servicios}
+        onChangeText={(servicios) => onChange({ servicios })}
+        placeholder="Consultas, Vacunación, Cirugías"
+      />
     </View>
   );
 }
