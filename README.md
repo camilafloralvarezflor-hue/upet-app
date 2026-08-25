@@ -22,8 +22,8 @@ Pensado para Argentina/LatAm. App en español.
 
 2. Crear un proyecto en [Supabase](https://supabase.com) y correr las
    migraciones (`supabase/migrations/`, en orden) desde el SQL Editor o con la
-   Supabase CLI. La `0002` crea el bucket de Storage `pets` para las fotos de
-   mascotas.
+   Supabase CLI. La `0002` crea el bucket de Storage `pets` (fotos de
+   mascotas) y la `0003` el bucket `businesses` (fotos de negocios).
 
 3. Copiar `.env.example` a `.env` y completar:
 
@@ -45,20 +45,23 @@ app/                    Rutas de Expo Router
   auth/                 Alta de cuenta, login, aviso de confirmación de email
   mascota/              CRUD de mascotas y vacunas (lista, detalle, alta, edición)
   (dueno)/              Tabs del dueño: mascota, buscar, emergencias
-  (empresa)/            Tabs de la empresa: panel, turnos, alta (oculta)
+  (empresa)/            Tabs de la empresa: panel, turnos, alta (wizard de 3 pasos)
   negocio/[id].tsx       Ficha pública de una empresa
 src/
   theme/tokens.ts        Paleta, tipografía, spacing (design tokens del Figma)
   lib/supabase.ts        Cliente de Supabase
   lib/auth-context.tsx   Sesión de Supabase en contexto (AuthProvider)
-  lib/storage.ts         Subida de fotos de mascotas a Supabase Storage
+  lib/storage.ts         Subida de fotos (mascotas/negocios) a Supabase Storage
   lib/vaccine-status.ts  Cálculo de estado de vacuna y formateo de fechas
+  lib/business-rubros.ts Rubros de empresa (veterinaria, paseador, etc.)
+  lib/horarios.ts        Días de la semana y horarios por defecto
   lib/database.types.ts  Tipos TS del modelo de datos
   lib/query-client.ts    QueryClient de TanStack Query
-  hooks/                 usePets, useVaccines, useProfile (TanStack Query)
+  hooks/                 usePets, useVaccines, useProfile, useBusiness (TanStack Query)
   components/            UI compartida (Screen, Typography, Button, PetForm, etc.)
+  components/alta/       Pasos del wizard de alta de empresa
   components/RouteGuard.tsx  Redirige según sesión/rol
-supabase/migrations/     Esquema SQL, políticas de RLS y bucket de Storage
+supabase/migrations/     Esquema SQL, políticas de RLS y buckets de Storage
 ```
 
 ## Modelo de datos
@@ -81,7 +84,7 @@ Especificación visual: [Figma](https://www.figma.com/design/wp34pCoyxiTcbsoG2uV
    navegación.
 2. ✅ Autenticación y selección de rol dueño/empresa.
 3. ✅ CRUD de mascotas + carnet de vacunas.
-4. Alta de empresa multi-paso, con el toggle de turnos online.
+4. ✅ Alta de empresa multi-paso, con el toggle de turnos online.
 5. Búsqueda geolocalizada por rubro + ficha pública de empresa.
 6. Reseñas vinculadas a contacto real, con respuesta pública de la empresa.
 7. Sector de emergencias con llamada de un toque.
