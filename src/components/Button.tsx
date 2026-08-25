@@ -5,7 +5,7 @@ import { colors, fonts, radii, spacing } from '../theme/tokens';
 interface ButtonProps {
   label: string;
   onPress?: () => void;
-  variant?: 'primary' | 'secondary' | 'gold';
+  variant?: 'primary' | 'secondary' | 'gold' | 'danger';
   disabled?: boolean;
   style?: ViewStyle;
 }
@@ -48,6 +48,14 @@ const variantStyles: Record<
   gold: {
     container: { backgroundColor: colors.gold },
     label: { color: colors.textDark },
+  },
+  danger: {
+    container: {
+      backgroundColor: colors.dangerBg,
+      borderWidth: 1,
+      borderColor: colors.dangerText,
+    },
+    label: { color: colors.dangerText },
   },
 };
 

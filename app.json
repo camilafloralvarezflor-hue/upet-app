@@ -48,6 +48,12 @@
         {
           "locationAlwaysAndWhenInUsePermission": "UPET usa tu ubicación para mostrarte veterinarias, paseadores y otros servicios cercanos."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "UPET necesita acceso a tus fotos para que puedas subir la foto de tu mascota."
+        }
       ]
     ],
     "experiments": {

@@ -9,6 +9,10 @@ export const colors = {
   border: '#E4E0D8',
   white: '#FFFFFF',
   danger: '#C4453A',
+  amber: '#7A5416',
+  amberBg: '#FCEFDA',
+  dangerText: '#C2483E',
+  dangerBg: '#FDEDEB',
 } as const;
 
 export const fonts = {
