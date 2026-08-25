@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -16,6 +16,7 @@ import { Screen } from '../../src/components/Screen';
 import { StarRating } from '../../src/components/StarRating';
 import { AppText, Heading2, MutedText } from '../../src/components/Typography';
 import { useBusinessDetail } from '../../src/hooks/useBusinesses';
+import { useLogBusinessEvent } from '../../src/hooks/useBusinessStats';
 import { useMyReviewForBusiness, useReviews } from '../../src/hooks/useReviews';
 import { useProfile } from '../../src/hooks/useProfile';
 import { colors, radii, spacing } from '../../src/theme/tokens';
@@ -29,7 +30,13 @@ export default function PerfilPublicoEmpresaScreen() {
   const { data: reviews, stats } = useReviews(id);
   const { data: profile } = useProfile();
   const { data: miResena } = useMyReviewForBusiness(id);
+  const logEvent = useLogBusinessEvent();
   const [fotoActiva, setFotoActiva] = useState(0);
+
+  useEffect(() => {
+    if (id) logEvent.mutate({ businessId: id, tipo: 'vista' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   if (isLoading || !business) {
     return (
@@ -44,7 +51,10 @@ export default function PerfilPublicoEmpresaScreen() {
   const estado = computeEstadoHorario(business.horarios);
 
   const handleLlamar = () => {
-    if (business.telefono) Linking.openURL(`tel:${business.telefono}`);
+    if (business.telefono) {
+      logEvent.mutate({ businessId: business.id, tipo: 'contacto' });
+      Linking.openURL(`tel:${business.telefono}`);
+    }
   };
 
   const handleComoLlegar = () => {
@@ -63,6 +73,7 @@ export default function PerfilPublicoEmpresaScreen() {
 
   const handleReservar = () => {
     if (business.turnos_habilitado) {
+      logEvent.mutate({ businessId: business.id, tipo: 'contacto' });
       router.push(`/negocio/${business.id}/reservar`);
     } else {
       handleLlamar();

@@ -10,7 +10,7 @@ Pensado para Argentina/LatAm. App en español.
 - **Backend**: Supabase (Postgres + Auth + Storage + Row Level Security).
 - **Mapas/geolocalización**: react-native-maps + Google Maps.
 - **Datos remotos**: TanStack Query.
-- **Notificaciones push**: Expo Notifications (se agrega en la etapa de turnos).
+- **Notificaciones push**: Expo Notifications (agregado en la Etapa 8, junto con turnos).
 
 ## Setup
 
@@ -25,8 +25,13 @@ Pensado para Argentina/LatAm. App en español.
    Supabase CLI. La `0002` crea el bucket de Storage `pets` (fotos de
    mascotas), la `0003` el bucket `businesses` (fotos de negocios) y la
    `0004` agrega la columna `servicios` a `businesses`, la `0005` agrega
-   una restricción única (una reseña por dueño y negocio) y la `0006`
-   agrega `especialidad` a `emergency_contacts`.
+   una restricción única (una reseña por dueño y negocio), la `0006`
+   agrega `especialidad` a `emergency_contacts`, la `0007` crea
+   `business_events` (estadísticas del Panel), la `0008` agrega la función
+   `get_booked_slots` (disponibilidad de turnos), la `0009` agrega
+   `expo_push_token` a `profiles` y la `0010` restringe qué columnas de
+   `profiles` son de lectura pública (importante correrla: sin ella
+   `telefono` y `expo_push_token` quedarían públicos).
 
 3. Copiar `.env.example` a `.env` y completar:
 
@@ -50,7 +55,7 @@ app/                    Rutas de Expo Router
   (dueno)/              Tabs del dueño: mascota, buscar, emergencias
   (empresa)/            Tabs de la empresa: panel, turnos, reseñas, alta (wizard de 3 pasos)
   negocio/[id].tsx       Ficha pública de una empresa
-  negocio/[id]/reservar.tsx  Placeholder de reserva de turno (etapa 8)
+  negocio/[id]/reservar.tsx  Reservar turno (dueño): mascota, día y horario disponible
   negocio/[id]/resena.tsx    Escribir/editar tu reseña (dueño)
 src/
   theme/tokens.ts        Paleta, tipografía, spacing (design tokens del Figma)
@@ -63,25 +68,30 @@ src/
   lib/geocode.ts         Geocodifica direcciones a lat/lng (expo-location)
   lib/geo.ts             Distancia entre coordenadas y formateo
   lib/business-hours-status.ts  Abierto/cerrado en base a horarios + hora actual
+  lib/turnos-slots.ts    Genera horarios disponibles para reservar un turno
+  lib/push-notifications.ts  Registro y envío de notificaciones push (Expo)
   lib/database.types.ts  Tipos TS del modelo de datos
   lib/query-client.ts    QueryClient de TanStack Query
   hooks/                 usePets, useVaccines, useProfile, useBusiness(es),
-                         useReviews, useUserLocation, useEmergencyContacts
-                         (TanStack Query)
+                         useReviews, useUserLocation, useEmergencyContacts,
+                         useAppointments, useBusinessStats (TanStack Query)
   components/            UI compartida (Screen, Typography, Button, PetForm,
                          BusinessCard, StarRating, RubroFilterChips, etc.)
   components/alta/       Pasos del wizard de alta de empresa
   components/RouteGuard.tsx  Redirige según sesión/rol
-supabase/migrations/     Esquema SQL, políticas de RLS y buckets de Storage
+supabase/migrations/     Esquema SQL, políticas de RLS, buckets de Storage y
+                         funciones (disponibilidad de turnos, push token)
 ```
 
 ## Modelo de datos
 
-Ver `supabase/migrations/`. Tablas: `profiles`, `pets`, `vaccines`,
-`businesses` (con `turnos_habilitado` y `servicios`, agregado en la `0004`),
-`reviews` (una por dueño y negocio, restricción agregada en la `0005`),
-`emergency_contacts` (con `especialidad`, agregado en la `0006`),
-`appointments`.
+Ver `supabase/migrations/`. Tablas: `profiles` (con `expo_push_token`,
+agregado en la `0009`, y columnas públicas restringidas en la `0010`),
+`pets`, `vaccines`, `businesses` (con `turnos_habilitado` y `servicios`,
+agregado en la `0004`), `reviews` (una por dueño y negocio, restricción
+agregada en la `0005`), `emergency_contacts` (con `especialidad`, agregado
+en la `0006`), `appointments`, y `business_events` (agregada en la `0007`,
+para las estadísticas del Panel de la empresa).
 
 ## Diseño
 
@@ -101,4 +111,4 @@ Especificación visual: [Figma](https://www.figma.com/design/wp34pCoyxiTcbsoG2uV
 5. ✅ Búsqueda geolocalizada por rubro + ficha pública de empresa.
 6. ✅ Reseñas vinculadas a contacto real, con respuesta pública de la empresa.
 7. ✅ Sector de emergencias con llamada de un toque.
-8. Panel de empresa (estadísticas + destacado) y agenda de turnos.
+8. ✅ Panel de empresa (estadísticas + destacado) y agenda de turnos.

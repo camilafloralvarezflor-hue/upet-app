@@ -54,6 +54,12 @@
         {
           "photosPermission": "UPET necesita acceso a tus fotos para que puedas subir la foto de tu mascota."
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#2E6F5E"
+        }
       ]
     ],
     "experiments": {

@@ -8,6 +8,7 @@ export interface Profile {
   nombre: string;
   telefono: string | null;
   avatar_url: string | null;
+  expo_push_token: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -95,4 +96,13 @@ export interface Appointment {
   requiere_seguimiento: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export type BusinessEventType = 'vista' | 'contacto';
+
+export interface BusinessEvent {
+  id: string;
+  business_id: string;
+  tipo: BusinessEventType;
+  created_at: string;
 }

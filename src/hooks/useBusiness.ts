@@ -58,7 +58,13 @@ export function useUpdateBusiness(id: string) {
   const ownerId = session?.user.id;
 
   return useMutation({
-    mutationFn: async (input: Partial<BusinessInput> & { fotos?: string[] }) => {
+    mutationFn: async (
+      input: Partial<BusinessInput> & {
+        fotos?: string[];
+        boost_activo?: boolean;
+        boost_vence?: string | null;
+      }
+    ) => {
       const { data, error } = await supabase
         .from('businesses')
         .update(input)
