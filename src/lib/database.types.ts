@@ -79,6 +79,7 @@ export interface EmergencyContact {
   lat: number | null;
   lng: number | null;
   horario_guardia: string | null;
+  especialidad: string | null;
   verificado_en: string | null;
   created_at: string;
 }

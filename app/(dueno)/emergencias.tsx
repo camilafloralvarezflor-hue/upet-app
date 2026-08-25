@@ -1,11 +1,164 @@
-import { PlaceholderScreen } from '../../src/components/PlaceholderScreen';
+import { ActivityIndicator, Linking, StyleSheet, View } from 'react-native';
+
+import { Button } from '../../src/components/Button';
+import { Screen } from '../../src/components/Screen';
+import { AppText, Heading1, Heading3, MutedText } from '../../src/components/Typography';
+import { useEmergencyContacts } from '../../src/hooks/useEmergencyContacts';
+import { useUserLocation } from '../../src/hooks/useUserLocation';
+import { colors, radii, spacing } from '../../src/theme/tokens';
+import { distanciaKm, formatDistancia } from '../../src/lib/geo';
+import type { EmergencyContact } from '../../src/lib/database.types';
 
 export default function EmergenciasScreen() {
+  const { data: contactos, isLoading } = useEmergencyContacts();
+  const { coords } = useUserLocation();
+
+  const ordenados = [...(contactos ?? [])].sort((a, b) => {
+    if (!coords || a.lat == null || a.lng == null) return 1;
+    if (b.lat == null || b.lng == null) return -1;
+    const distanciaA = distanciaKm(coords.lat, coords.lng, a.lat, a.lng);
+    const distanciaB = distanciaKm(coords.lat, coords.lng, b.lat, b.lng);
+    return distanciaA - distanciaB;
+  });
+
   return (
-    <PlaceholderScreen
-      etapa="Etapa 7"
-      titulo="Emergencias"
-      descripcion="Acá va el listado de contactos de emergencia con llamada de un toque."
-    />
+    <Screen>
+      <Heading1 style={styles.title}>Emergencias</Heading1>
+      <MutedText style={styles.subtitle}>Guardias veterinarias 24 hs cerca tuyo</MutedText>
+
+      <View style={styles.banner}>
+        <MutedText style={styles.bannerText}>
+          ¿Es una urgencia? Elegí una guardia y llamá directo, sin buscar en internet.
+        </MutedText>
+      </View>
+
+      {isLoading ? (
+        <View style={styles.loading}>
+          <ActivityIndicator color={colors.primary} />
+        </View>
+      ) : ordenados.length === 0 ? (
+        <MutedText style={styles.empty}>
+          Todavía no hay guardias de emergencia cargadas en tu zona.
+        </MutedText>
+      ) : (
+        ordenados.map((contacto) => (
+          <EmergencyCard
+            key={contacto.id}
+            contacto={contacto}
+            distanciaKm={
+              coords && contacto.lat != null && contacto.lng != null
+                ? distanciaKm(coords.lat, coords.lng, contacto.lat, contacto.lng)
+                : null
+            }
+          />
+        ))
+      )}
+    </Screen>
   );
 }
+
+function EmergencyCard({
+  contacto,
+  distanciaKm: distancia,
+}: {
+  contacto: EmergencyContact;
+  distanciaKm: number | null;
+}) {
+  const es24hs = contacto.horario_guardia?.trim().toLowerCase() === '24 hs';
+
+  return (
+    <View style={styles.card}>
+      <View style={styles.cardHeader}>
+        <Heading3 style={styles.cardName}>{contacto.nombre}</Heading3>
+        {contacto.horario_guardia && (
+          <View style={[styles.badge, es24hs ? styles.badgePrimary : styles.badgeAmber]}>
+            <AppText
+              variant="caption"
+              style={es24hs ? styles.badgeTextPrimary : styles.badgeTextAmber}
+            >
+              {contacto.horario_guardia}
+            </AppText>
+          </View>
+        )}
+      </View>
+
+      {contacto.especialidad && <MutedText>{contacto.especialidad}</MutedText>}
+
+      <MutedText>
+        {contacto.direccion}
+        {distancia != null ? ` · ${formatDistancia(distancia)}` : ''}
+      </MutedText>
+
+      <Button
+        label="Llamar ahora"
+        onPress={() => Linking.openURL(`tel:${contacto.telefono}`)}
+        style={styles.callButton}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  title: {
+    marginTop: spacing.xl,
+  },
+  subtitle: {
+    marginTop: spacing.xs,
+    marginBottom: spacing.md,
+  },
+  banner: {
+    backgroundColor: colors.primaryLight,
+    borderRadius: radii.lg,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  bannerText: {
+    color: colors.primary,
+    fontSize: 13,
+  },
+  loading: {
+    marginTop: spacing.xl,
+  },
+  empty: {
+    textAlign: 'center',
+    marginTop: spacing.xl,
+  },
+  card: {
+    backgroundColor: colors.white,
+    borderRadius: radii.lg,
+    padding: spacing.md,
+    gap: spacing.xs,
+    marginBottom: spacing.md,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  cardName: {
+    flex: 1,
+  },
+  badge: {
+    borderRadius: radii.sm,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+  },
+  badgePrimary: {
+    backgroundColor: colors.primaryLight,
+  },
+  badgeAmber: {
+    backgroundColor: colors.amberBg,
+  },
+  badgeTextPrimary: {
+    color: colors.primary,
+    fontWeight: '700',
+  },
+  badgeTextAmber: {
+    color: colors.amber,
+    fontWeight: '700',
+  },
+  callButton: {
+    marginTop: spacing.sm,
+  },
+});

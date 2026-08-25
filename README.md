@@ -24,8 +24,9 @@ Pensado para Argentina/LatAm. App en español.
    migraciones (`supabase/migrations/`, en orden) desde el SQL Editor o con la
    Supabase CLI. La `0002` crea el bucket de Storage `pets` (fotos de
    mascotas), la `0003` el bucket `businesses` (fotos de negocios) y la
-   `0004` agrega la columna `servicios` a `businesses`, y la `0005` agrega
-   una restricción única (una reseña por dueño y negocio).
+   `0004` agrega la columna `servicios` a `businesses`, la `0005` agrega
+   una restricción única (una reseña por dueño y negocio) y la `0006`
+   agrega `especialidad` a `emergency_contacts`.
 
 3. Copiar `.env.example` a `.env` y completar:
 
@@ -65,7 +66,8 @@ src/
   lib/database.types.ts  Tipos TS del modelo de datos
   lib/query-client.ts    QueryClient de TanStack Query
   hooks/                 usePets, useVaccines, useProfile, useBusiness(es),
-                         useReviews, useUserLocation (TanStack Query)
+                         useReviews, useUserLocation, useEmergencyContacts
+                         (TanStack Query)
   components/            UI compartida (Screen, Typography, Button, PetForm,
                          BusinessCard, StarRating, RubroFilterChips, etc.)
   components/alta/       Pasos del wizard de alta de empresa
@@ -78,7 +80,8 @@ supabase/migrations/     Esquema SQL, políticas de RLS y buckets de Storage
 Ver `supabase/migrations/`. Tablas: `profiles`, `pets`, `vaccines`,
 `businesses` (con `turnos_habilitado` y `servicios`, agregado en la `0004`),
 `reviews` (una por dueño y negocio, restricción agregada en la `0005`),
-`emergency_contacts`, `appointments`.
+`emergency_contacts` (con `especialidad`, agregado en la `0006`),
+`appointments`.
 
 ## Diseño
 
@@ -97,5 +100,5 @@ Especificación visual: [Figma](https://www.figma.com/design/wp34pCoyxiTcbsoG2uV
 4. ✅ Alta de empresa multi-paso, con el toggle de turnos online.
 5. ✅ Búsqueda geolocalizada por rubro + ficha pública de empresa.
 6. ✅ Reseñas vinculadas a contacto real, con respuesta pública de la empresa.
-7. Sector de emergencias con llamada de un toque.
+7. ✅ Sector de emergencias con llamada de un toque.
 8. Panel de empresa (estadísticas + destacado) y agenda de turnos.
