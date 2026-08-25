@@ -19,10 +19,12 @@ export const fonts = {
 } as const;
 
 export const typography = {
-  h1: { fontFamily: fonts.headingBold, fontSize: 28, lineHeight: 34, color: colors.textDark },
+  h1: { fontFamily: fonts.headingBold, fontSize: 26, lineHeight: 32, color: colors.textDark },
   h2: { fontFamily: fonts.heading, fontSize: 22, lineHeight: 28, color: colors.textDark },
   h3: { fontFamily: fonts.heading, fontSize: 18, lineHeight: 24, color: colors.textDark },
+  logo: { fontFamily: fonts.headingBold, fontSize: 20, lineHeight: 24, color: colors.textDark },
   body: { fontFamily: fonts.body, fontSize: 15, lineHeight: 22, color: colors.textDark },
+  bodyMedium: { fontFamily: fonts.bodyMedium, fontSize: 15, lineHeight: 22, color: colors.textDark },
   bodyMuted: { fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: colors.textMuted },
   caption: { fontFamily: fonts.body, fontSize: 12, lineHeight: 16, color: colors.textFaint },
 } as const;

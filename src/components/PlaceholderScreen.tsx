@@ -1,16 +1,17 @@
+import { PropsWithChildren } from 'react';
 import { View, StyleSheet } from 'react-native';
 
 import { Screen } from './Screen';
 import { Heading2, MutedText, Caption } from './Typography';
 import { colors, radii, spacing } from '../theme/tokens';
 
-interface PlaceholderScreenProps {
+interface PlaceholderScreenProps extends PropsWithChildren {
   titulo: string;
   descripcion: string;
   etapa: string;
 }
 
-export function PlaceholderScreen({ titulo, descripcion, etapa }: PlaceholderScreenProps) {
+export function PlaceholderScreen({ titulo, descripcion, etapa, children }: PlaceholderScreenProps) {
   return (
     <Screen>
       <View style={styles.badge}>
@@ -18,6 +19,7 @@ export function PlaceholderScreen({ titulo, descripcion, etapa }: PlaceholderScr
       </View>
       <Heading2 style={styles.title}>{titulo}</Heading2>
       <MutedText>{descripcion}</MutedText>
+      {children}
     </Screen>
   );
 }

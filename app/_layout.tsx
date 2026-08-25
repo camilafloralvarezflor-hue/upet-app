@@ -6,7 +6,9 @@ import * as SplashScreen from 'expo-splash-screen';
 import { Stack } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { AuthProvider, useSession } from '../src/lib/auth-context';
 import { queryClient } from '../src/lib/query-client';
+import { RouteGuard } from '../src/components/RouteGuard';
 import { colors } from '../src/theme/tokens';
 
 SplashScreen.preventAutoHideAsync();
@@ -19,35 +21,51 @@ export default function RootLayout() {
     Inter_500Medium,
   });
 
-  const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded) {
-      await SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
-
-  useEffect(() => {
-    onLayoutRootView();
-  }, [onLayoutRootView]);
-
   if (!fontsLoaded) {
     return null;
   }
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SafeAreaProvider>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.cream },
-          }}
-        >
-          <Stack.Screen name="index" />
-          <Stack.Screen name="(dueno)" />
-          <Stack.Screen name="(empresa)" />
-          <Stack.Screen name="negocio/[id]" options={{ presentation: 'card' }} />
-        </Stack>
-      </SafeAreaProvider>
+      <AuthProvider>
+        <SafeAreaProvider>
+          <RootNavigator />
+        </SafeAreaProvider>
+      </AuthProvider>
     </QueryClientProvider>
+  );
+}
+
+function RootNavigator() {
+  const { isLoading } = useSession();
+
+  const onLayout = useCallback(async () => {
+    if (!isLoading) {
+      await SplashScreen.hideAsync();
+    }
+  }, [isLoading]);
+
+  useEffect(() => {
+    onLayout();
+  }, [onLayout]);
+
+  if (isLoading) {
+    return null;
+  }
+
+  return (
+    <RouteGuard>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.cream },
+        }}
+      >
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(dueno)" />
+        <Stack.Screen name="(empresa)" />
+        <Stack.Screen name="negocio/[id]" options={{ presentation: 'card' }} />
+      </Stack>
+    </RouteGuard>
   );
 }

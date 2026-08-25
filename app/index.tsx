@@ -1,102 +1,175 @@
-import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
-import { Button } from '../src/components/Button';
 import { Screen } from '../src/components/Screen';
-import { BodyText, Heading1, MutedText } from '../src/components/Typography';
+import { AppText, Heading1, MutedText } from '../src/components/Typography';
 import { colors, radii, spacing } from '../src/theme/tokens';
 
 type Role = 'dueno' | 'empresa';
 
 export default function RegistroScreen() {
   const router = useRouter();
-  const [role, setRole] = useState<Role | null>(null);
 
-  const handleContinuar = () => {
-    if (role === 'dueno') {
-      router.replace('/(dueno)/mascota');
-    } else if (role === 'empresa') {
-      router.replace('/(empresa)/alta');
-    }
+  const elegirRol = (role: Role) => {
+    router.push({ pathname: '/auth/sign-up', params: { role } });
   };
 
   return (
-    <Screen>
-      <View style={styles.header}>
-        <Heading1>Bienvenido a UPET</Heading1>
-        <MutedText style={styles.subtitle}>
-          El lugar donde tu mascota encuentra todo lo que necesita.
-        </MutedText>
+    <Screen style={styles.screen}>
+      <View style={styles.decorativeCircle} pointerEvents="none" />
+
+      <View style={styles.logoRow}>
+        <View style={styles.logoDot} />
+        <AppText variant="logo">UPET</AppText>
       </View>
 
-      <View style={styles.roles}>
+      <Heading1 style={styles.title}>Todo para tu mascota, cerca tuyo</Heading1>
+      <MutedText style={styles.subtitle}>
+        Contanos quién sos para armarte la experiencia justa.
+      </MutedText>
+
+      <View style={styles.cards}>
         <RoleCard
+          variant="light"
           label="Soy dueño de mascota"
-          description="Buscá servicios cercanos, llevá el carnet de vacunas y gestioná turnos."
-          selected={role === 'dueno'}
-          onPress={() => setRole('dueno')}
+          description="Buscá servicios y cargá a tus mascotas"
+          onPress={() => elegirRol('dueno')}
         />
         <RoleCard
-          label="Tengo una empresa"
-          description="Veterinaria, paseador, peluquero, petshop o cuidador. Registro gratuito."
-          selected={role === 'empresa'}
-          onPress={() => setRole('empresa')}
+          variant="dark"
+          label="Soy una empresa"
+          description="Veterinaria, paseador, peluquería, petshop o cuidador"
+          onPress={() => elegirRol('empresa')}
         />
       </View>
 
-      <Button label="Continuar" onPress={handleContinuar} disabled={!role} />
+      <Pressable style={styles.loginLink} onPress={() => router.push('/auth/login')} hitSlop={8}>
+        <MutedText style={styles.loginLinkText}>¿Ya tenés cuenta?  Iniciar sesión</MutedText>
+      </Pressable>
     </Screen>
   );
 }
 
 function RoleCard({
+  variant,
   label,
   description,
-  selected,
   onPress,
 }: {
+  variant: 'light' | 'dark';
   label: string;
   description: string;
-  selected: boolean;
   onPress: () => void;
 }) {
+  const isDark = variant === 'dark';
   return (
     <Pressable
       onPress={onPress}
-      style={[styles.card, selected && styles.cardSelected]}
+      style={({ pressed }) => [
+        styles.card,
+        isDark ? styles.cardDark : styles.cardLight,
+        pressed && styles.cardPressed,
+      ]}
     >
-      <BodyText style={styles.cardLabel}>{label}</BodyText>
-      <MutedText>{description}</MutedText>
+      <View style={[styles.cardIcon, isDark ? styles.cardIconDark : styles.cardIconLight]} />
+      <View style={styles.cardText}>
+        <AppText variant="bodyMedium" style={isDark && styles.cardLabelDark}>
+          {label}
+        </AppText>
+        <AppText variant="bodyMuted" style={[styles.cardDescription, isDark && styles.cardDescriptionDark]}>
+          {description}
+        </AppText>
+      </View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
+  screen: {
+    padding: 0,
+    overflow: 'hidden',
+  },
+  decorativeCircle: {
+    position: 'absolute',
+    top: -70,
+    left: 250,
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: colors.primaryLight,
+  },
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
     marginTop: spacing.xl,
-    marginBottom: spacing.xl,
+    marginLeft: spacing.lg,
+  },
+  logoDot: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colors.primary,
+  },
+  title: {
+    marginTop: spacing.lg,
+    marginHorizontal: spacing.lg,
   },
   subtitle: {
     marginTop: spacing.sm,
+    marginHorizontal: spacing.lg,
   },
-  roles: {
+  cards: {
+    marginTop: spacing.lg,
+    marginHorizontal: spacing.lg,
     gap: spacing.md,
-    marginBottom: spacing.xl,
   },
   card: {
-    borderWidth: 1,
-    borderColor: colors.border,
+    flexDirection: 'row',
+    alignItems: 'center',
     borderRadius: radii.lg,
-    padding: spacing.lg,
-    backgroundColor: colors.white,
-    gap: spacing.xs,
+    padding: spacing.md,
+    gap: spacing.md,
   },
-  cardSelected: {
-    borderColor: colors.primary,
+  cardLight: {
+    backgroundColor: colors.white,
+  },
+  cardDark: {
+    backgroundColor: colors.textDark,
+  },
+  cardPressed: {
+    opacity: 0.85,
+  },
+  cardIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 14,
+  },
+  cardIconLight: {
     backgroundColor: colors.primaryLight,
   },
-  cardLabel: {
-    fontWeight: '600',
+  cardIconDark: {
+    backgroundColor: colors.primary,
+  },
+  cardText: {
+    flex: 1,
+    gap: 2,
+  },
+  cardLabelDark: {
+    color: colors.cream,
+  },
+  cardDescription: {
+    fontSize: 12.5,
+  },
+  cardDescriptionDark: {
+    color: '#B9C2BD',
+  },
+  loginLink: {
+    marginTop: 'auto',
+    marginBottom: spacing.xl,
+    alignItems: 'center',
+  },
+  loginLinkText: {
+    fontSize: 13.5,
   },
 });
