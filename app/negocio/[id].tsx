@@ -16,7 +16,8 @@ import { Screen } from '../../src/components/Screen';
 import { StarRating } from '../../src/components/StarRating';
 import { AppText, Heading2, MutedText } from '../../src/components/Typography';
 import { useBusinessDetail } from '../../src/hooks/useBusinesses';
-import { useReviews } from '../../src/hooks/useReviews';
+import { useMyReviewForBusiness, useReviews } from '../../src/hooks/useReviews';
+import { useProfile } from '../../src/hooks/useProfile';
 import { colors, radii, spacing } from '../../src/theme/tokens';
 import { rubroLabel } from '../../src/lib/business-rubros';
 import { computeEstadoHorario } from '../../src/lib/business-hours-status';
@@ -26,6 +27,8 @@ export default function PerfilPublicoEmpresaScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: business, isLoading } = useBusinessDetail(id);
   const { data: reviews, stats } = useReviews(id);
+  const { data: profile } = useProfile();
+  const { data: miResena } = useMyReviewForBusiness(id);
   const [fotoActiva, setFotoActiva] = useState(0);
 
   if (isLoading || !business) {
@@ -143,7 +146,16 @@ export default function PerfilPublicoEmpresaScreen() {
           )}
 
           <View style={styles.section}>
-            <AppText variant="bodyMedium">Reseñas ({stats.total})</AppText>
+            <View style={styles.reviewsHeader}>
+              <AppText variant="bodyMedium">Reseñas ({stats.total})</AppText>
+              {profile?.role === 'dueno' && (
+                <Pressable onPress={() => router.push(`/negocio/${business.id}/resena`)}>
+                  <AppText variant="bodyMedium" style={styles.reviewsAction}>
+                    {miResena ? 'Editar mi reseña' : 'Escribir reseña'}
+                  </AppText>
+                </Pressable>
+              )}
+            </View>
             {reviews && reviews.length === 0 && (
               <MutedText style={styles.sinResenas}>
                 Todavía no hay reseñas para este negocio.
@@ -321,6 +333,15 @@ const styles = StyleSheet.create({
   section: {
     marginTop: spacing.lg,
     gap: spacing.sm,
+  },
+  reviewsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  reviewsAction: {
+    color: colors.primary,
+    fontSize: 13,
   },
   chips: {
     flexDirection: 'row',

@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { supabase } from '../lib/supabase';
+import { useSession } from '../lib/auth-context';
 import type { Review } from '../lib/database.types';
 
 export type ReviewWithAutor = Review & { profiles: { nombre: string } | null };
@@ -60,5 +61,76 @@ export function useReviewStatsMap() {
   return useQuery({
     queryKey: ['reviews', 'stats-map'],
     queryFn: fetchReviewStatsMap,
+  });
+}
+
+async function fetchMyReview(businessId: string, ownerId: string): Promise<Review | null> {
+  const { data, error } = await supabase
+    .from('reviews')
+    .select('*')
+    .eq('business_id', businessId)
+    .eq('owner_id', ownerId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+export function useMyReviewForBusiness(businessId: string | undefined) {
+  const { session } = useSession();
+  const ownerId = session?.user.id;
+
+  return useQuery({
+    queryKey: ['reviews', 'mine', businessId, ownerId],
+    queryFn: () => fetchMyReview(businessId as string, ownerId as string),
+    enabled: !!businessId && !!ownerId,
+  });
+}
+
+export interface ReviewInput {
+  calificacion: number;
+  comentario: string | null;
+}
+
+export function useSaveReview(businessId: string) {
+  const { session } = useSession();
+  const queryClient = useQueryClient();
+  const ownerId = session?.user.id as string;
+
+  return useMutation({
+    mutationFn: async (input: ReviewInput) => {
+      const { data, error } = await supabase
+        .from('reviews')
+        .upsert(
+          { business_id: businessId, owner_id: ownerId, ...input, vinculada_a_visita: false },
+          { onConflict: 'business_id,owner_id' }
+        )
+        .select()
+        .single();
+      if (error) throw error;
+      return data as Review;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reviews', businessId] });
+      queryClient.invalidateQueries({ queryKey: ['reviews', 'mine', businessId, ownerId] });
+      queryClient.invalidateQueries({ queryKey: ['reviews', 'stats-map'] });
+    },
+  });
+}
+
+export function useRespondReview(businessId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ reviewId, respuesta }: { reviewId: string; respuesta: string }) => {
+      const { error } = await supabase
+        .from('reviews')
+        .update({ respuesta_empresa: respuesta })
+        .eq('id', reviewId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reviews', businessId] });
+    },
   });
 }

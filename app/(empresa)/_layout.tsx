@@ -15,6 +15,7 @@ export default function EmpresaLayout() {
     >
       <Tabs.Screen name="panel" options={{ title: 'Panel' }} />
       <Tabs.Screen name="turnos" options={{ title: 'Turnos' }} />
+      <Tabs.Screen name="resenas" options={{ title: 'Reseñas' }} />
       <Tabs.Screen name="alta" options={{ href: null }} />
     </Tabs>
   );
