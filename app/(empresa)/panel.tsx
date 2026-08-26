@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
     fontSize: 14.5,
   },
   boostSubtitle: {
-    color: '#B9C2BD',
+    color: 'rgba(245,234,216,0.6)',
     fontSize: 12,
     lineHeight: 18,
   },

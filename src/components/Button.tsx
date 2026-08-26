@@ -6,14 +6,14 @@ import { colors, fonts, radii, spacing } from '../theme/tokens';
 interface ButtonProps {
   label: string;
   onPress?: () => void;
-  variant?: 'primary' | 'dark' | 'secondary' | 'gold' | 'danger';
+  variant?: 'primary' | 'dark' | 'secondary' | 'danger';
   icon?: IconName;
   disabled?: boolean;
   style?: ViewStyle;
 }
 
 export function Button({ label, onPress, variant = 'primary', icon, disabled, style }: ButtonProps) {
-  const variantStyle = variantStyles[variant];
+  const variantStyle = disabled ? disabledStyle : variantStyles[variant];
   return (
     <Pressable
       onPress={onPress}
@@ -21,7 +21,6 @@ export function Button({ label, onPress, variant = 'primary', icon, disabled, st
       style={({ pressed }) => [
         styles.base,
         variantStyle.container,
-        disabled && styles.disabled,
         pressed && !disabled && styles.pressed,
         style,
       ]}
@@ -39,39 +38,36 @@ const variantStyles: Record<
   { container: ViewStyle; label: { color: string } }
 > = {
   primary: {
-    container: { backgroundColor: colors.primary },
-    label: { color: colors.white },
+    container: { backgroundColor: colors.brand900 },
+    label: { color: colors.onDark },
   },
   dark: {
-    container: { backgroundColor: colors.textDark },
-    label: { color: colors.cream },
+    container: { backgroundColor: colors.brand900 },
+    label: { color: colors.onDark },
   },
   secondary: {
     container: {
-      backgroundColor: colors.cream,
-      borderWidth: 1,
-      borderColor: colors.border,
+      backgroundColor: 'transparent',
+      borderWidth: 1.5,
+      borderColor: colors.brand900,
     },
-    label: { color: colors.textDark },
-  },
-  gold: {
-    container: { backgroundColor: colors.gold },
-    label: { color: colors.textDark },
+    label: { color: colors.brand900 },
   },
   danger: {
-    container: {
-      backgroundColor: colors.dangerBg,
-      borderWidth: 1,
-      borderColor: colors.dangerText,
-    },
-    label: { color: colors.dangerText },
+    container: { backgroundColor: colors.alert500 },
+    label: { color: colors.white },
   },
+};
+
+const disabledStyle = {
+  container: { backgroundColor: colors.bgNeutral },
+  label: { color: colors.textFainter },
 };
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: 14,
-    paddingVertical: spacing.md,
+    borderRadius: radii.pill,
+    paddingVertical: spacing.md - 1,
     paddingHorizontal: spacing.lg,
     alignItems: 'center',
     justifyContent: 'center',
@@ -82,11 +78,8 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   label: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 16,
-  },
-  disabled: {
-    opacity: 0.5,
+    fontFamily: fonts.display,
+    fontSize: 15,
   },
   pressed: {
     opacity: 0.85,

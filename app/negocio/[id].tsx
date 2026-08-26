@@ -111,7 +111,7 @@ export default function PerfilPublicoEmpresaScreen() {
             </ScrollView>
           ) : (
             <LinearGradient
-              colors={['#2E6F5E', '#1F4E42']}
+              colors={['#272E1B', '#1F4E42']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.bannerPlaceholder}
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(30,40,35,0.35)',
+    backgroundColor: 'rgba(32,30,29,0.35)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -425,7 +425,7 @@ const styles = StyleSheet.create({
     gap: 1,
   },
   respuesta: {
-    backgroundColor: '#F1EEE7',
+    backgroundColor: '#EEE7DB',
     borderRadius: radii.md,
     padding: spacing.sm + 2,
     gap: 2,

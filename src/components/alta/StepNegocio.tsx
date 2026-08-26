@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1.6,
     borderStyle: 'dashed',
-    borderColor: '#C9C2B4',
+    borderColor: '#DCD3C4',
     alignItems: 'center',
     justifyContent: 'center',
   },

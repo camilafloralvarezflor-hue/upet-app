@@ -1,36 +1,81 @@
+// Paleta y tipografía del rebrand "Mawys UI": verde oliva/salvia + terracota
+// (semántica, solo para urgencia/vencimiento/SOS), Caprasimo para títulos y
+// montos/timer, Figtree para todo el texto corrido.
+
 export const colors = {
-  primary: '#2E6F5E',
-  cream: '#FBF8F4',
-  textDark: '#1E2823',
-  primaryLight: '#EAF3F0',
-  gold: '#E8A33D',
-  textMuted: '#5B6B65',
-  textFaint: '#8A9A94',
-  border: '#E4E0D8',
+  // brand — verde oliva
+  brand900: '#272E1B',
+  brand700: '#56633F',
+  brand500: '#8FA073',
+  brand200: '#E1EECC',
+  brandDark: '#3D472B',
+  brandLightBg: '#F0FAE1',
+  brandCircleSoft: '#CCDBB2',
+  brandCircleFaint: '#AEBF92',
+  routeWalked: '#728157',
+
+  // alert — terracota, solo urgencia/SOS/vencimiento/falta-algo
+  alert500: '#C67139',
+  alert200: '#FFE1D0',
+  alertText: '#8C491A',
+
+  // base
+  bgApp: '#F9F4ED',
+  bgCard: '#FFFFFF',
+  bgNeutral: '#EEE7DB',
+  border300: '#DCD3C4',
+  textDark: '#201E1D',
+  textMuted: 'rgba(32,30,29,0.62)',
+  textFaint: 'rgba(32,30,29,0.5)',
+  textFainter: 'rgba(32,30,29,0.4)',
+  iconFaint: '#A19786',
+  onDark: '#F5EAD8',
+  onDarkMuted: 'rgba(245,234,216,0.6)',
   white: '#FFFFFF',
-  danger: '#C4453A',
-  amber: '#7A5416',
-  amberBg: '#FCEFDA',
-  dangerText: '#C2483E',
-  dangerBg: '#FDEDEB',
+
+  // alias retrocompatibles usados por componentes compartidos
+  primary: '#272E1B',
+  cream: '#F9F4ED',
+  primaryLight: '#E1EECC',
+  gold: '#C67139',
+  border: '#DCD3C4',
+  danger: '#C67139',
+  dangerText: '#8C491A',
+  dangerBg: '#FFE1D0',
+  amber: '#8C491A',
+  amberBg: '#FFE1D0',
 } as const;
 
 export const fonts = {
-  heading: 'Sora_600SemiBold',
-  headingBold: 'Sora_700Bold',
-  body: 'Inter_400Regular',
-  bodyMedium: 'Inter_500Medium',
+  display: 'Caprasimo_400Regular',
+  heading: 'Caprasimo_400Regular',
+  headingBold: 'Caprasimo_400Regular',
+  body: 'Figtree_400Regular',
+  bodyMedium: 'Figtree_500Medium',
+  bodySemiBold: 'Figtree_600SemiBold',
+  bodyBold: 'Figtree_700Bold',
+  mono: 'ui-monospace',
 } as const;
 
 export const typography = {
-  h1: { fontFamily: fonts.headingBold, fontSize: 26, lineHeight: 32, color: colors.textDark },
-  h2: { fontFamily: fonts.heading, fontSize: 22, lineHeight: 28, color: colors.textDark },
-  h3: { fontFamily: fonts.heading, fontSize: 18, lineHeight: 24, color: colors.textDark },
-  logo: { fontFamily: fonts.headingBold, fontSize: 20, lineHeight: 24, color: colors.textDark },
-  body: { fontFamily: fonts.body, fontSize: 15, lineHeight: 22, color: colors.textDark },
-  bodyMedium: { fontFamily: fonts.bodyMedium, fontSize: 15, lineHeight: 22, color: colors.textDark },
-  bodyMuted: { fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: colors.textMuted },
+  display: { fontFamily: fonts.display, fontSize: 36, lineHeight: 39, color: colors.textDark },
+  h1: { fontFamily: fonts.display, fontSize: 23, lineHeight: 27, color: colors.textDark },
+  h2: { fontFamily: fonts.display, fontSize: 19, lineHeight: 23, color: colors.textDark },
+  h3: { fontFamily: fonts.display, fontSize: 16, lineHeight: 20, color: colors.textDark },
+  logo: { fontFamily: fonts.display, fontSize: 21, lineHeight: 25, color: colors.textDark },
+  body: { fontFamily: fonts.body, fontSize: 14, lineHeight: 21, color: colors.textDark },
+  bodyMedium: { fontFamily: fonts.bodySemiBold, fontSize: 14.5, lineHeight: 20, color: colors.textDark },
+  bodyMuted: { fontFamily: fonts.body, fontSize: 14, lineHeight: 21, color: colors.textMuted },
   caption: { fontFamily: fonts.body, fontSize: 12, lineHeight: 16, color: colors.textFaint },
+  label: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 11.5,
+    lineHeight: 15,
+    letterSpacing: 0.6,
+    color: colors.textFaint,
+    textTransform: 'uppercase' as const,
+  },
+  code: { fontFamily: fonts.mono, fontSize: 11, lineHeight: 14, color: colors.brand700 },
 } as const;
 
 export const spacing = {
@@ -44,8 +89,9 @@ export const spacing = {
 
 export const radii = {
   sm: 8,
-  md: 12,
-  lg: 20,
+  md: 14,
+  lg: 24,
+  xl: 28,
   pill: 999,
 } as const;
 

@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   },
   bannerText: {
     flex: 1,
-    color: '#7A2E27',
+    color: '#8C491A',
     fontSize: 13,
     lineHeight: 19,
   },

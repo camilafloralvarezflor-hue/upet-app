@@ -26,11 +26,11 @@ import type { AppointmentStatus } from '../../src/lib/database.types';
 const DIA_LABEL = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
 const ESTADO_META: Record<AppointmentStatus, { label: string; bg: string; text: string }> = {
-  pendiente: { label: 'Pendiente', bg: '#FCEFDA', text: '#7A5416' },
-  confirmado: { label: 'Confirmado', bg: '#EAF3F0', text: '#2E6F5E' },
-  en_curso: { label: 'En curso', bg: '#EAF3F0', text: '#2E6F5E' },
-  completado: { label: 'Completado', bg: '#E4E0D8', text: '#5B6B65' },
-  cancelado: { label: 'Cancelado', bg: '#FDEDEB', text: '#C2483E' },
+  pendiente: { label: 'Pendiente', bg: '#FFE1D0', text: '#8C491A' },
+  confirmado: { label: 'Confirmado', bg: '#E1EECC', text: '#272E1B' },
+  en_curso: { label: 'En curso', bg: '#E1EECC', text: '#272E1B' },
+  completado: { label: 'Completado', bg: '#DCD3C4', text: 'rgba(32,30,29,0.62)' },
+  cancelado: { label: 'Cancelado', bg: '#FFE1D0', text: '#8C491A' },
 };
 
 export default function TurnosEmpresaScreen() {

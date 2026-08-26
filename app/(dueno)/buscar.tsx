@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   },
   toggle: {
     flexDirection: 'row',
-    backgroundColor: '#EFEBE3',
+    backgroundColor: '#EEE7DB',
     borderRadius: 10,
     padding: 3,
   },
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
   },
   toggleOptionActive: {
     backgroundColor: colors.white,
-    shadowColor: 'rgba(30,40,35,0.3)',
+    shadowColor: 'rgba(32,30,29,0.3)',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 2,

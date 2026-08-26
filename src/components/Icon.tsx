@@ -46,7 +46,7 @@ type IconProps = {
   strokeWidth?: number;
 };
 
-export function Icon({ name, size = 22, color = '#1E2823', strokeWidth = 1.8 }: IconProps) {
+export function Icon({ name, size = 22, color = '#272E1B', strokeWidth = 1.8 }: IconProps) {
   const filled = FILLED_ICONS.has(name);
   const common = filled
     ? { fill: color, stroke: 'none' }
@@ -202,7 +202,7 @@ function renderIcon(name: IconName, common: Record<string, unknown>) {
           <Path
             d="M8 12.2l2.6 2.6L16.5 9"
             fill="none"
-            stroke="#FBF8F4"
+            stroke="#F9F4ED"
             strokeWidth={2}
             strokeLinecap="round"
             strokeLinejoin="round"

@@ -91,7 +91,7 @@ function RoleCard({
           {description}
         </AppText>
       </View>
-      <Icon name="chevronRight" size={20} color={isDark ? '#B9C2BD' : colors.textFaint} strokeWidth={2} />
+      <Icon name="chevronRight" size={20} color={isDark ? 'rgba(245,234,216,0.6)' : colors.textFaint} strokeWidth={2} />
     </Pressable>
   );
 }
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     width: 110,
     height: 110,
     borderRadius: 55,
-    backgroundColor: 'rgba(232,163,61,0.14)',
+    backgroundColor: 'rgba(198,113,57,0.14)',
   },
   logoRow: {
     flexDirection: 'row',
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.border,
-    shadowColor: 'rgba(30,40,35,0.4)',
+    shadowColor: 'rgba(32,30,29,0.4)',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.15,
     shadowRadius: 2,
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
   },
   cardDark: {
     backgroundColor: colors.textDark,
-    shadowColor: 'rgba(30,40,35,0.6)',
+    shadowColor: 'rgba(32,30,29,0.6)',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 14,
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
   },
   cardDescriptionDark: {
-    color: '#B9C2BD',
+    color: 'rgba(245,234,216,0.6)',
   },
   loginLink: {
     marginTop: 'auto',
