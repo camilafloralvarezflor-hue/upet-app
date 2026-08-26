@@ -6,6 +6,16 @@ export type AppointmentStatus =
   | 'en_curso'
   | 'completado'
   | 'cancelado';
+export type PetTamano = 'chico' | 'mediano' | 'grande';
+export type PetTemperamento =
+  | 'sociable'
+  | 'tira_correa'
+  | 'miedo_bicis'
+  | 'no_gatos'
+  | 'necesita_bozal';
+export type VerificacionTipo = 'dni' | 'selfie' | 'antecedentes' | 'primeros_auxilios';
+export type VerificacionEstado = 'pendiente' | 'en_revision' | 'validado' | 'rechazado';
+export type PayoutEstado = 'solicitado' | 'procesado' | 'rechazado';
 
 export interface Profile {
   id: string;
@@ -28,6 +38,8 @@ export interface Pet {
   peso: number | null;
   foto_url: string | null;
   condiciones_medicas: string | null;
+  tamano: PetTamano | null;
+  temperamento: PetTemperamento[];
   created_at: string;
   updated_at: string;
 }
@@ -62,6 +74,7 @@ export interface Business {
   verificado: boolean;
   boost_activo: boolean;
   boost_vence: string | null;
+  cbu_alias: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -102,6 +115,9 @@ export interface Appointment {
   monto: number | null;
   comision_pct: number | null;
   pagado: boolean;
+  grupo_id: string | null;
+  codigo_checkin: string | null;
+  checkin_en: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -120,5 +136,32 @@ export interface BusinessEvent {
   id: string;
   business_id: string;
   tipo: BusinessEventType;
+  created_at: string;
+}
+
+export interface Message {
+  id: string;
+  appointment_id: string;
+  sender_id: string;
+  texto: string | null;
+  foto_url: string | null;
+  created_at: string;
+}
+
+export interface WalkerVerification {
+  id: string;
+  business_id: string;
+  tipo: VerificacionTipo;
+  estado: VerificacionEstado;
+  archivo_url: string | null;
+  validado_en: string | null;
+  created_at: string;
+}
+
+export interface PayoutRequest {
+  id: string;
+  business_id: string;
+  monto: number;
+  estado: PayoutEstado;
   created_at: string;
 }

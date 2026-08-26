@@ -6,7 +6,14 @@ import type { Business } from '../lib/database.types';
 
 export type BusinessInput = Omit<
   Business,
-  'id' | 'owner_id' | 'created_at' | 'updated_at' | 'verificado' | 'boost_activo' | 'boost_vence'
+  | 'id'
+  | 'owner_id'
+  | 'created_at'
+  | 'updated_at'
+  | 'verificado'
+  | 'boost_activo'
+  | 'boost_vence'
+  | 'cbu_alias'
 >;
 
 async function fetchMyBusiness(ownerId: string): Promise<Business | null> {

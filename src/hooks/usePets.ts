@@ -4,7 +4,11 @@ import { supabase } from '../lib/supabase';
 import { useSession } from '../lib/auth-context';
 import type { Pet } from '../lib/database.types';
 
-export type PetInput = Omit<Pet, 'id' | 'owner_id' | 'created_at' | 'updated_at'>;
+export type PetInput = Omit<
+  Pet,
+  'id' | 'owner_id' | 'created_at' | 'updated_at' | 'tamano' | 'temperamento'
+> &
+  Partial<Pick<Pet, 'tamano' | 'temperamento'>>;
 
 async function fetchPets(ownerId: string): Promise<Pet[]> {
   const { data, error } = await supabase
