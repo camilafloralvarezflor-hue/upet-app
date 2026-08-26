@@ -20,10 +20,10 @@ export default function RegistroScreen() {
 
       <View style={styles.logoRow}>
         <View style={styles.logoDot} />
-        <AppText variant="logo">UPET</AppText>
+        <AppText variant="logo">Mawis</AppText>
       </View>
 
-      <Heading1 style={styles.title}>Todo para tu mascota, cerca tuyo</Heading1>
+      <Heading1 style={styles.title}>Paseos y cuidado para tu mascota, cerca tuyo</Heading1>
       <MutedText style={styles.subtitle}>
         Contanos quién sos para armarte la experiencia justa.
       </MutedText>
@@ -32,13 +32,13 @@ export default function RegistroScreen() {
         <RoleCard
           variant="light"
           label="Soy dueño de mascota"
-          description="Buscá servicios y cargá a tus mascotas"
+          description="Registro gratis: encontrá paseadores y cuidadores"
           onPress={() => elegirRol('dueno')}
         />
         <RoleCard
           variant="dark"
-          label="Soy una empresa"
-          description="Veterinaria, paseador, peluquería, petshop o cuidador"
+          label="Soy paseador o cuidador"
+          description="Registro gratis: ofrecé tus servicios de paseo y cuidado"
           onPress={() => elegirRol('empresa')}
         />
       </View>

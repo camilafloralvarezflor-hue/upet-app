@@ -12,6 +12,9 @@ import { useReviewStatsMap } from '../../src/hooks/useReviews';
 import { useUserLocation } from '../../src/hooks/useUserLocation';
 import { colors, fonts, radii, spacing } from '../../src/theme/tokens';
 import { distanciaKm } from '../../src/lib/geo';
+import { RUBROS_ACTIVOS } from '../../src/lib/business-rubros';
+
+const RUBROS_ACTIVOS_VALORES = new Set(RUBROS_ACTIVOS.map((r) => r.value));
 
 export default function BuscarCercaScreen() {
   const router = useRouter();
@@ -35,6 +38,7 @@ export default function BuscarCercaScreen() {
     if (!businesses) return [];
 
     return businesses
+      .filter((b) => RUBROS_ACTIVOS_VALORES.has(b.rubro))
       .filter((b) => (rubro ? b.rubro === rubro : true))
       .filter((b) => b.nombre.toLowerCase().includes(query.trim().toLowerCase()))
       .map((b) => ({
@@ -68,7 +72,7 @@ export default function BuscarCercaScreen() {
       <TextInput
         value={query}
         onChangeText={setQuery}
-        placeholder="Buscar veterinarias, paseadores…"
+        placeholder="Buscar paseadores, cuidadores…"
         placeholderTextColor={colors.textFaint}
         style={styles.searchBar}
       />

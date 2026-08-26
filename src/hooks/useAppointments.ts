@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { useSession } from '../lib/auth-context';
 import type { Appointment, AppointmentStatus } from '../lib/database.types';
 import { sendPushNotification } from '../lib/push-notifications';
+import { COMISION_PLATAFORMA_PCT } from '../lib/comision';
 
 async function fetchPushToken(userId: string): Promise<string | null> {
   const { data, error } = await supabase.rpc('get_push_token', { p_user_id: userId });
@@ -14,6 +15,11 @@ async function fetchPushToken(userId: string): Promise<string | null> {
 export type AppointmentWithDetalle = Appointment & {
   pets: { nombre: string } | null;
   profiles: { nombre: string } | null;
+};
+
+export type AppointmentWithNegocio = Appointment & {
+  pets: { nombre: string } | null;
+  businesses: { nombre: string; owner_id: string } | null;
 };
 
 function rangoDelDia(dia: Date) {
@@ -108,7 +114,7 @@ export function useCreateAppointment() {
         sendPushNotification(
           token,
           'Nuevo turno solicitado',
-          'Tenés una nueva solicitud de turno en UPET.'
+          'Tenés una nueva solicitud de turno en Mawis.'
         );
       }
     },
@@ -140,14 +146,96 @@ export function useUpdateAppointmentStatus(businessId: string | undefined) {
 
       const token = await fetchPushToken(updated.owner_id);
       if (token) {
+        sendPushNotification(token, PUSH_ESTADO_META[estado].titulo, PUSH_ESTADO_META[estado].cuerpo);
+      }
+    },
+  });
+}
+
+const PUSH_ESTADO_META: Record<AppointmentStatus, { titulo: string; cuerpo: string }> = {
+  pendiente: { titulo: 'Turno pendiente', cuerpo: 'Tu turno quedó pendiente de confirmación.' },
+  confirmado: { titulo: 'Turno confirmado', cuerpo: 'El prestador confirmó tu turno.' },
+  en_curso: { titulo: '¡Tu paseo empezó!', cuerpo: 'Podés seguir el recorrido en vivo desde el turno.' },
+  completado: { titulo: 'Paseo finalizado', cuerpo: 'El servicio terminó. Ya podés dejar tu reseña.' },
+  cancelado: { titulo: 'Turno cancelado', cuerpo: 'El prestador canceló tu turno.' },
+};
+
+export interface FinalizarServicioInput {
+  appointmentId: string;
+  monto: number;
+}
+
+export function useFinalizarServicio(businessId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ appointmentId, monto }: FinalizarServicioInput) => {
+      const { data, error } = await supabase
+        .from('appointments')
+        .update({
+          estado: 'completado',
+          monto,
+          comision_pct: COMISION_PLATAFORMA_PCT,
+          pagado: true,
+        })
+        .eq('id', appointmentId)
+        .select()
+        .single();
+      if (error) throw error;
+      return data as Appointment;
+    },
+    onSuccess: async (updated) => {
+      queryClient.invalidateQueries({ queryKey: ['appointments', businessId] });
+
+      const token = await fetchPushToken(updated.owner_id);
+      if (token) {
         sendPushNotification(
           token,
-          estado === 'confirmado' ? 'Turno confirmado' : 'Turno cancelado',
-          estado === 'confirmado'
-            ? 'La empresa confirmó tu turno.'
-            : 'La empresa canceló tu turno.'
+          PUSH_ESTADO_META.completado.titulo,
+          PUSH_ESTADO_META.completado.cuerpo
         );
       }
     },
+  });
+}
+
+async function fetchAppointment(id: string): Promise<AppointmentWithNegocio> {
+  const { data, error } = await supabase
+    .from('appointments')
+    .select('*, pets(nombre), businesses(nombre, owner_id)')
+    .eq('id', id)
+    .single();
+  if (error) throw error;
+  return data as unknown as AppointmentWithNegocio;
+}
+
+export function useAppointment(id: string | undefined) {
+  return useQuery({
+    queryKey: ['appointment', id],
+    queryFn: () => fetchAppointment(id as string),
+    enabled: !!id,
+    refetchInterval: (query) =>
+      query.state.data?.estado === 'en_curso' ? 15000 : false,
+  });
+}
+
+async function fetchMyAppointments(ownerId: string): Promise<AppointmentWithNegocio[]> {
+  const { data, error } = await supabase
+    .from('appointments')
+    .select('*, pets(nombre), businesses(nombre, owner_id)')
+    .eq('owner_id', ownerId)
+    .order('fecha_hora', { ascending: false });
+  if (error) throw error;
+  return data as unknown as AppointmentWithNegocio[];
+}
+
+export function useMyAppointments() {
+  const { session } = useSession();
+  const ownerId = session?.user.id;
+
+  return useQuery({
+    queryKey: ['appointments', 'mine', ownerId],
+    queryFn: () => fetchMyAppointments(ownerId as string),
+    enabled: !!ownerId,
   });
 }

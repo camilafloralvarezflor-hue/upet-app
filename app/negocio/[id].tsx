@@ -67,7 +67,7 @@ export default function PerfilPublicoEmpresaScreen() {
 
   const handleCompartir = () => {
     Share.share({
-      message: `${business.nombre} — encontralo en UPET`,
+      message: `${business.nombre} — encontralo en Mawis`,
     });
   };
 

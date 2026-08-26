@@ -1,6 +1,11 @@
 export type UserRole = 'dueno' | 'empresa';
 export type VaccineStatus = 'al_dia' | 'proxima' | 'vencida';
-export type AppointmentStatus = 'pendiente' | 'confirmado' | 'cancelado';
+export type AppointmentStatus =
+  | 'pendiente'
+  | 'confirmado'
+  | 'en_curso'
+  | 'completado'
+  | 'cancelado';
 
 export interface Profile {
   id: string;
@@ -94,8 +99,19 @@ export interface Appointment {
   estado: AppointmentStatus;
   tipo_servicio: string | null;
   requiere_seguimiento: boolean;
+  monto: number | null;
+  comision_pct: number | null;
+  pagado: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface WalkLocation {
+  id: string;
+  appointment_id: string;
+  lat: number;
+  lng: number;
+  recorded_at: string;
 }
 
 export type BusinessEventType = 'vista' | 'contacto';

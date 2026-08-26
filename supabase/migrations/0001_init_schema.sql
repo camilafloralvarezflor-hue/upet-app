@@ -1,4 +1,4 @@
--- UPET — esquema inicial (Etapa 1: Fundaciones)
+-- Mawis — esquema inicial (Etapa 1: Fundaciones)
 -- Postgres/Supabase con Row Level Security.
 
 create extension if not exists "uuid-ossp";

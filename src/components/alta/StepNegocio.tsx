@@ -70,7 +70,7 @@ export function StepNegocio({ form, onChange, onCambiarRubro }: StepNegocioProps
         label="Nombre del negocio"
         value={form.nombre}
         onChangeText={(nombre) => onChange({ nombre })}
-        placeholder="Ej. Veterinaria San Roque"
+        placeholder="Ej. Paseos con Tato"
       />
 
       <TextField

@@ -1,4 +1,4 @@
--- UPET — bucket de Storage para fotos de negocios (Etapa 4)
+-- Mawis — bucket de Storage para fotos de negocios (Etapa 4)
 -- Convención de path: <owner_id>/<business_id>/<n>.jpg
 
 insert into storage.buckets (id, name, public)

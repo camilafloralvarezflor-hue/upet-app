@@ -1,8 +1,14 @@
-# UPET
+# Mawis
 
-Marketplace móvil de dos lados para dueños de mascotas y empresas del rubro
-animal (veterinarias, paseadores, peluqueros, petshops, cuidadores).
-Pensado para Argentina/LatAm. App en español.
+Marketplace móvil de dos lados enfocado en paseo y cuidado de mascotas
+(dog walking / pet sitting): dueños de mascotas contratando paseadores y
+cuidadores. Registro gratuito para los dos lados; la plataforma se queda
+con una comisión configurable sobre lo que cobra cada prestador por
+servicio. Pensado para Argentina/LatAm. App en español.
+
+Otros rubros (veterinaria, peluquería, petshop) ya están contemplados en
+el modelo de datos pero **no están activos todavía** — quedan reservados
+para una fase futura (ver `src/lib/business-rubros.ts`).
 
 ## Stack
 
@@ -29,9 +35,12 @@ Pensado para Argentina/LatAm. App en español.
    agrega `especialidad` a `emergency_contacts`, la `0007` crea
    `business_events` (estadísticas del Panel), la `0008` agrega la función
    `get_booked_slots` (disponibilidad de turnos), la `0009` agrega
-   `expo_push_token` a `profiles` y la `0010` restringe qué columnas de
+   `expo_push_token` a `profiles`, la `0010` restringe qué columnas de
    `profiles` son de lectura pública (importante correrla: sin ella
-   `telefono` y `expo_push_token` quedarían públicos).
+   `telefono` y `expo_push_token` quedarían públicos), la `0011` agrega los
+   estados `en_curso`/`completado` a los turnos y los campos de cobro
+   (`monto`/`comision_pct`/`pagado`), y la `0012` crea `walk_locations` y la
+   habilita en Supabase Realtime (necesaria para el tracking en vivo).
 
 3. Copiar `.env.example` a `.env` y completar:
 
@@ -52,35 +61,42 @@ app/                    Rutas de Expo Router
   index.tsx             Registro / selección de rol
   auth/                 Alta de cuenta, login, aviso de confirmación de email
   mascota/              CRUD de mascotas y vacunas (lista, detalle, alta, edición)
-  (dueno)/              Tabs del dueño: mascota, buscar, emergencias
+  (dueno)/              Tabs del dueño: mascota, buscar, turnos, emergencias
   (empresa)/            Tabs de la empresa: panel, turnos, reseñas, alta (wizard de 3 pasos)
-  negocio/[id].tsx       Ficha pública de una empresa
+  negocio/[id].tsx       Ficha pública de una empresa (paseador/cuidador)
   negocio/[id]/reservar.tsx  Reservar turno (dueño): mascota, día y horario disponible
   negocio/[id]/resena.tsx    Escribir/editar tu reseña (dueño)
+  turno/[id]/en-vivo.tsx     Tracking en vivo: el paseador comparte ubicación,
+                             el dueño ve el mapa (solo mientras el turno
+                             está "en_curso")
 src/
   theme/tokens.ts        Paleta, tipografía, spacing (design tokens del Figma)
   lib/supabase.ts        Cliente de Supabase
   lib/auth-context.tsx   Sesión de Supabase en contexto (AuthProvider)
   lib/storage.ts         Subida de fotos (mascotas/negocios) a Supabase Storage
   lib/vaccine-status.ts  Cálculo de estado de vacuna y formateo de fechas
-  lib/business-rubros.ts Rubros de empresa (veterinaria, paseador, etc.)
+  lib/business-rubros.ts Rubros de empresa — solo paseador/cuidador activos,
+                         el resto queda reservado a futuro
   lib/horarios.ts        Días de la semana y horarios por defecto
   lib/geocode.ts         Geocodifica direcciones a lat/lng (expo-location)
   lib/geo.ts             Distancia entre coordenadas y formateo
   lib/business-hours-status.ts  Abierto/cerrado en base a horarios + hora actual
   lib/turnos-slots.ts    Genera horarios disponibles para reservar un turno
+  lib/comision.ts        % de comisión de la plataforma (configurable) + cálculo del neto
   lib/push-notifications.ts  Registro y envío de notificaciones push (Expo)
   lib/database.types.ts  Tipos TS del modelo de datos
   lib/query-client.ts    QueryClient de TanStack Query
   hooks/                 usePets, useVaccines, useProfile, useBusiness(es),
                          useReviews, useUserLocation, useEmergencyContacts,
-                         useAppointments, useBusinessStats (TanStack Query)
+                         useAppointments (agenda + cobro), useBusinessStats,
+                         useWalkTracking (publicar/mirar el recorrido en vivo)
   components/            UI compartida (Screen, Typography, Button, PetForm,
                          BusinessCard, StarRating, RubroFilterChips, etc.)
   components/alta/       Pasos del wizard de alta de empresa
   components/RouteGuard.tsx  Redirige según sesión/rol
-supabase/migrations/     Esquema SQL, políticas de RLS, buckets de Storage y
-                         funciones (disponibilidad de turnos, push token)
+supabase/migrations/     Esquema SQL, políticas de RLS, buckets de Storage,
+                         funciones (disponibilidad de turnos, push token) y
+                         Realtime (tracking en vivo)
 ```
 
 ## Modelo de datos
@@ -90,8 +106,38 @@ agregado en la `0009`, y columnas públicas restringidas en la `0010`),
 `pets`, `vaccines`, `businesses` (con `turnos_habilitado` y `servicios`,
 agregado en la `0004`), `reviews` (una por dueño y negocio, restricción
 agregada en la `0005`), `emergency_contacts` (con `especialidad`, agregado
-en la `0006`), `appointments`, y `business_events` (agregada en la `0007`,
-para las estadísticas del Panel de la empresa).
+en la `0006`), `business_events` (agregada en la `0007`, para las
+estadísticas del Panel de la empresa), `appointments` (estados
+`pendiente → confirmado → en_curso → completado`, o `cancelado`; con
+`monto`/`comision_pct`/`pagado` agregados en la `0011`), y
+`walk_locations` (agregada en la `0012`, con Realtime habilitado, para el
+recorrido en vivo del paseo).
+
+## Cambios de producto sobre el MVP original
+
+- **Rename a Mawis**: nombre de producto en `app.json`, textos, README. El
+  repo de GitHub sigue siendo `upet-app` a propósito.
+- **Reenfoque a Paseo/Cuidado**: `RUBROS_ACTIVOS` en
+  `src/lib/business-rubros.ts` es hoy solo Paseador/Cuidador. Veterinaria,
+  Peluquería y Petshop siguen en el modelo de datos (`RUBROS`) pero no se
+  muestran en el alta ni en los filtros de búsqueda hasta que se reactiven.
+- **Registro gratuito**: ya lo era desde el MVP original — no hay paywall
+  en ningún alta.
+- **Comisión por servicio**: `src/lib/comision.ts` define
+  `COMISION_PLATAFORMA_PCT` (15% de ejemplo) y `calcularNeto()`. El
+  prestador carga el monto que cobró al finalizar el paseo (pantalla
+  Turnos de la empresa), la app calcula y muestra comisión/neto, y guarda
+  el `comision_pct` vigente en ese momento en el propio turno. **No hay
+  procesador de pagos real conectado todavía** — ver el `TODO(pagos)` en
+  `src/lib/comision.ts`.
+- **Tracking en vivo**: mientras un turno está `en_curso`,
+  `useWalkLocationPublisher` (lado paseador) publica su ubicación a
+  `walk_locations` cada ~8 s, y `useWalkTrail` (lado dueño) la recibe por
+  Supabase Realtime y la dibuja en un mapa (`app/turno/[id]/en-vivo.tsx`).
+  El tracking es **solo en foreground**: si el paseador manda la app a
+  segundo plano se corta: habilitar ubicación en background requeriría
+  permisos adicionales (`expo-location` background + `TaskManager`) que no
+  están activados en este MVP.
 
 ## Diseño
 

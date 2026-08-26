@@ -58,7 +58,7 @@ export default function ReservarTurnoScreen() {
         fechaHora: horaSeleccionada,
         tipoServicio: tipoServicio.trim(),
       });
-      router.replace(`/negocio/${id}`);
+      router.replace('/(dueno)/turnos');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No pudimos reservar el turno.');
     }
@@ -149,10 +149,10 @@ export default function ReservarTurnoScreen() {
             )}
 
             <TextField
-              label="Motivo de la consulta (opcional)"
+              label="Tipo de servicio (opcional)"
               value={tipoServicio}
               onChangeText={setTipoServicio}
-              placeholder="Control de rutina, vacunación…"
+              placeholder="Paseo de 30 min, cuidado por el día…"
               style={styles.tipoServicio}
             />
 

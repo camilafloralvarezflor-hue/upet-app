@@ -1,4 +1,4 @@
--- UPET — restringe qué columnas de profiles son públicas (Etapa 8)
+-- Mawis — restringe qué columnas de profiles son públicas (Etapa 8)
 --
 -- La política de RLS "profiles: lectura pública" (USING (true)) sigue
 -- vigente a nivel de fila, pero ahora que agregamos expo_push_token

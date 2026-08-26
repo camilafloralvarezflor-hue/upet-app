@@ -4,9 +4,16 @@ import { useRouter } from 'expo-router';
 
 import { Button } from '../../src/components/Button';
 import { Screen } from '../../src/components/Screen';
+import { TextField } from '../../src/components/TextField';
 import { AppText, Heading1, MutedText } from '../../src/components/Typography';
 import { useMyBusiness } from '../../src/hooks/useBusiness';
-import { useAppointmentsForBusiness, useUpdateAppointmentStatus } from '../../src/hooks/useAppointments';
+import {
+  useAppointmentsForBusiness,
+  useFinalizarServicio,
+  useUpdateAppointmentStatus,
+  type AppointmentWithDetalle,
+} from '../../src/hooks/useAppointments';
+import { calcularNeto } from '../../src/lib/comision';
 import { proximosDias } from '../../src/lib/turnos-slots';
 import { colors, radii, spacing } from '../../src/theme/tokens';
 import type { AppointmentStatus } from '../../src/lib/database.types';
@@ -16,6 +23,8 @@ const DIA_LABEL = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
 const ESTADO_META: Record<AppointmentStatus, { label: string; bg: string; text: string }> = {
   pendiente: { label: 'Pendiente', bg: '#FCEFDA', text: '#7A5416' },
   confirmado: { label: 'Confirmado', bg: '#EAF3F0', text: '#2E6F5E' },
+  en_curso: { label: 'En curso', bg: '#EAF3F0', text: '#2E6F5E' },
+  completado: { label: 'Completado', bg: '#E4E0D8', text: '#5B6B65' },
   cancelado: { label: 'Cancelado', bg: '#FDEDEB', text: '#C2483E' },
 };
 
@@ -29,6 +38,9 @@ export default function TurnosEmpresaScreen() {
     diaSeleccionado
   );
   const updateStatus = useUpdateAppointmentStatus(business?.id);
+  const finalizarServicio = useFinalizarServicio(business?.id);
+  const [finalizandoId, setFinalizandoId] = useState<string | null>(null);
+  const [monto, setMonto] = useState('');
 
   if (loadingBusiness) {
     return (
@@ -60,6 +72,14 @@ export default function TurnosEmpresaScreen() {
       </Screen>
     );
   }
+
+  const handleFinalizar = async (appointmentId: string) => {
+    const montoNumero = Number(monto.replace(',', '.'));
+    if (!montoNumero || montoNumero <= 0) return;
+    await finalizarServicio.mutateAsync({ appointmentId, monto: montoNumero });
+    setFinalizandoId(null);
+    setMonto('');
+  };
 
   return (
     <Screen>
@@ -93,54 +113,144 @@ export default function TurnosEmpresaScreen() {
       ) : turnos && turnos.length === 0 ? (
         <MutedText style={styles.aviso}>No tenés turnos para este día.</MutedText>
       ) : (
-        turnos?.map((turno) => {
-          const meta = ESTADO_META[turno.estado];
-          return (
-            <View key={turno.id} style={styles.card}>
-              <MutedText style={styles.hora}>
-                {new Date(turno.fecha_hora).toLocaleTimeString('es-AR', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </MutedText>
-              <View style={styles.cardBody}>
-                <View style={styles.cardIcon} />
-                <View style={styles.cardText}>
-                  <AppText variant="bodyMedium">
-                    {turno.pets?.nombre ?? 'Mascota'} · {turno.profiles?.nombre ?? 'Dueño'}
-                  </AppText>
-                  {turno.tipo_servicio && <MutedText>{turno.tipo_servicio}</MutedText>}
-                </View>
-                <View style={[styles.badge, { backgroundColor: meta.bg }]}>
-                  <AppText variant="caption" style={{ color: meta.text, fontWeight: '700' }}>
-                    {meta.label}
-                  </AppText>
-                </View>
-              </View>
-              {turno.estado === 'pendiente' && (
-                <View style={styles.actions}>
-                  <Button
-                    label="Confirmar"
-                    onPress={() =>
-                      updateStatus.mutate({ appointmentId: turno.id, estado: 'confirmado' })
-                    }
-                    style={styles.actionButton}
-                  />
-                  <Button
-                    label="Cancelar"
-                    variant="danger"
-                    onPress={() =>
-                      updateStatus.mutate({ appointmentId: turno.id, estado: 'cancelado' })
-                    }
-                    style={styles.actionButton}
-                  />
-                </View>
-              )}
-            </View>
-          );
-        })
+        turnos?.map((turno) => (
+          <TurnoCard
+            key={turno.id}
+            turno={turno}
+            finalizando={finalizandoId === turno.id}
+            monto={monto}
+            onMontoChange={setMonto}
+            onConfirmar={() => updateStatus.mutate({ appointmentId: turno.id, estado: 'confirmado' })}
+            onCancelar={() => updateStatus.mutate({ appointmentId: turno.id, estado: 'cancelado' })}
+            onIniciar={() => updateStatus.mutate({ appointmentId: turno.id, estado: 'en_curso' })}
+            onVerRecorrido={() => router.push(`/turno/${turno.id}/en-vivo`)}
+            onEmpezarFinalizar={() => {
+              setFinalizandoId(turno.id);
+              setMonto('');
+            }}
+            onCancelarFinalizar={() => setFinalizandoId(null)}
+            onConfirmarFinalizar={() => handleFinalizar(turno.id)}
+            guardando={finalizarServicio.isPending}
+          />
+        ))
       )}
     </Screen>
+  );
+}
+
+function TurnoCard({
+  turno,
+  finalizando,
+  monto,
+  onMontoChange,
+  onConfirmar,
+  onCancelar,
+  onIniciar,
+  onVerRecorrido,
+  onEmpezarFinalizar,
+  onCancelarFinalizar,
+  onConfirmarFinalizar,
+  guardando,
+}: {
+  turno: AppointmentWithDetalle;
+  finalizando: boolean;
+  monto: string;
+  onMontoChange: (v: string) => void;
+  onConfirmar: () => void;
+  onCancelar: () => void;
+  onIniciar: () => void;
+  onVerRecorrido: () => void;
+  onEmpezarFinalizar: () => void;
+  onCancelarFinalizar: () => void;
+  onConfirmarFinalizar: () => void;
+  guardando: boolean;
+}) {
+  const meta = ESTADO_META[turno.estado];
+  const desglose =
+    turno.estado === 'completado' && turno.monto != null && turno.comision_pct != null
+      ? calcularNeto(turno.monto, turno.comision_pct)
+      : null;
+
+  return (
+    <View style={styles.card}>
+      <MutedText style={styles.hora}>
+        {new Date(turno.fecha_hora).toLocaleTimeString('es-AR', {
+          hour: '2-digit',
+          minute: '2-digit',
+        })}
+      </MutedText>
+      <View style={styles.cardBody}>
+        <View style={styles.cardIcon} />
+        <View style={styles.cardText}>
+          <AppText variant="bodyMedium">
+            {turno.pets?.nombre ?? 'Mascota'} · {turno.profiles?.nombre ?? 'Dueño'}
+          </AppText>
+          {turno.tipo_servicio && <MutedText>{turno.tipo_servicio}</MutedText>}
+        </View>
+        <View style={[styles.badge, { backgroundColor: meta.bg }]}>
+          <AppText variant="caption" style={{ color: meta.text, fontWeight: '700' }}>
+            {meta.label}
+          </AppText>
+        </View>
+      </View>
+
+      {turno.estado === 'pendiente' && (
+        <View style={styles.actions}>
+          <Button label="Confirmar" onPress={onConfirmar} style={styles.actionButton} />
+          <Button label="Cancelar" variant="danger" onPress={onCancelar} style={styles.actionButton} />
+        </View>
+      )}
+
+      {turno.estado === 'confirmado' && (
+        <Button label="Iniciar paseo" onPress={onIniciar} />
+      )}
+
+      {turno.estado === 'en_curso' && !finalizando && (
+        <View style={styles.actions}>
+          <Button label="Ver recorrido en vivo" onPress={onVerRecorrido} style={styles.actionButton} />
+          <Button
+            label="Finalizar paseo"
+            variant="secondary"
+            onPress={onEmpezarFinalizar}
+            style={styles.actionButton}
+          />
+        </View>
+      )}
+
+      {turno.estado === 'en_curso' && finalizando && (
+        <View style={styles.finalizarForm}>
+          <TextField
+            label="¿Cuánto cobraste por este servicio?"
+            value={monto}
+            onChangeText={onMontoChange}
+            placeholder="Ej. 5000"
+            keyboardType="decimal-pad"
+          />
+          <View style={styles.actions}>
+            <Button
+              label="Cancelar"
+              variant="secondary"
+              onPress={onCancelarFinalizar}
+              style={styles.actionButton}
+            />
+            <Button
+              label={guardando ? 'Guardando…' : 'Confirmar cobro'}
+              onPress={onConfirmarFinalizar}
+              disabled={guardando}
+              style={styles.actionButton}
+            />
+          </View>
+        </View>
+      )}
+
+      {desglose && (
+        <View style={styles.desglose}>
+          <MutedText>Cobraste ${turno.monto?.toFixed(2)}</MutedText>
+          <MutedText>Comisión Mawis ({turno.comision_pct}%): ${desglose.comision.toFixed(2)}</MutedText>
+          <AppText variant="bodyMedium">Neto para vos: ${desglose.neto.toFixed(2)}</AppText>
+        </View>
+      )}
+    </View>
   );
 }
 
@@ -216,5 +326,14 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
+  },
+  finalizarForm: {
+    gap: spacing.sm,
+  },
+  desglose: {
+    backgroundColor: colors.primaryLight,
+    borderRadius: radii.md,
+    padding: spacing.sm,
+    gap: 2,
   },
 });

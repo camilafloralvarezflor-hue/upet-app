@@ -27,7 +27,7 @@ export function StepContacto({ form, onChange }: StepContactoProps) {
         label="Servicios que ofrecés (opcional, separados por coma)"
         value={form.servicios}
         onChangeText={(servicios) => onChange({ servicios })}
-        placeholder="Consultas, Vacunación, Cirugías"
+        placeholder="Paseo corto, Paseo largo, Cuidado por el día"
       />
     </View>
   );

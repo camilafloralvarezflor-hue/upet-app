@@ -1,4 +1,4 @@
--- UPET — disponibilidad de turnos (Etapa 8)
+-- Mawis — disponibilidad de turnos (Etapa 8)
 -- Función de solo lectura para que un dueño pueda ver qué horarios ya están
 -- ocupados en un negocio sin tener acceso (vía RLS) a los turnos de otros
 -- dueños. Solo expone la fecha_hora ocupada, ninguna otra columna.

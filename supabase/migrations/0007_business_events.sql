@@ -1,4 +1,4 @@
--- UPET — estadísticas reales del Panel de la empresa (Etapa 8)
+-- Mawis — estadísticas reales del Panel de la empresa (Etapa 8)
 -- Registra vistas de la ficha pública y contactos (llamadas / reservas)
 -- para poder mostrar "Vistas esta semana" y "Contactos" con datos reales.
 

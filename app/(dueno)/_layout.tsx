@@ -15,6 +15,7 @@ export default function DuenoLayout() {
     >
       <Tabs.Screen name="mascota" options={{ title: 'Mi mascota' }} />
       <Tabs.Screen name="buscar" options={{ title: 'Buscar' }} />
+      <Tabs.Screen name="turnos" options={{ title: 'Mis turnos' }} />
       <Tabs.Screen name="emergencias" options={{ title: 'Emergencias' }} />
     </Tabs>
   );

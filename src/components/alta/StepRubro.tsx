@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '../Typography';
-import { RUBROS } from '../../lib/business-rubros';
+import { RUBROS_ACTIVOS } from '../../lib/business-rubros';
 import { colors, radii, spacing } from '../../theme/tokens';
 
 export function StepRubro({
@@ -13,7 +13,7 @@ export function StepRubro({
 }) {
   return (
     <View style={styles.list}>
-      {RUBROS.map((rubro) => {
+      {RUBROS_ACTIVOS.map((rubro) => {
         const selected = value === rubro.value;
         return (
           <Pressable

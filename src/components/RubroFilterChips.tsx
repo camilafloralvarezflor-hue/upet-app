@@ -1,7 +1,7 @@
 import { Pressable, ScrollView, StyleSheet } from 'react-native';
 
 import { AppText } from './Typography';
-import { RUBROS } from '../lib/business-rubros';
+import { RUBROS_ACTIVOS } from '../lib/business-rubros';
 import { colors, radii, spacing } from '../theme/tokens';
 
 interface RubroFilterChipsProps {
@@ -17,7 +17,7 @@ export function RubroFilterChips({ value, onChange }: RubroFilterChipsProps) {
       contentContainerStyle={styles.row}
     >
       <Chip label="Todos" selected={value === null} onPress={() => onChange(null)} />
-      {RUBROS.map((rubro) => (
+      {RUBROS_ACTIVOS.map((rubro) => (
         <Chip
           key={rubro.value}
           label={rubro.labelPlural}

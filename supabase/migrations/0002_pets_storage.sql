@@ -1,4 +1,4 @@
--- UPET — bucket de Storage para fotos de mascotas (Etapa 3)
+-- Mawis — bucket de Storage para fotos de mascotas (Etapa 3)
 -- Convención de path: <owner_id>/<pet_id>.jpg
 
 insert into storage.buckets (id, name, public)
