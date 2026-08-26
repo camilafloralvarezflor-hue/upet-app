@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { Button } from '../../src/components/Button';
+import { Icon } from '../../src/components/Icon';
 import { Screen } from '../../src/components/Screen';
 import { SignOutButton } from '../../src/components/SignOutButton';
 import { AppText, MutedText } from '../../src/components/Typography';
@@ -119,10 +120,8 @@ export default function AltaEmpresaScreen() {
   return (
     <Screen style={styles.screen}>
       <View style={styles.header}>
-        <Pressable onPress={handleBack} hitSlop={12} disabled={step === 1}>
-          <AppText variant="h3" style={step === 1 && styles.backHidden}>
-            ‹
-          </AppText>
+        <Pressable onPress={handleBack} hitSlop={12} disabled={step === 1} style={step === 1 && styles.backHidden}>
+          <Icon name="chevronLeft" size={22} color={colors.textDark} strokeWidth={2} />
         </Pressable>
         <AppText variant="bodyMedium" style={styles.headerTitle}>
           Alta de tu negocio
@@ -150,6 +149,7 @@ export default function AltaEmpresaScreen() {
       <View style={styles.footer}>
         <Button
           label={step === 3 ? (saving ? 'Publicando…' : 'Publicar perfil') : 'Continuar'}
+          variant="dark"
           onPress={handleContinuar}
           disabled={continuarDisabled || saving}
         />

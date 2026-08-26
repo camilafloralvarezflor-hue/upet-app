@@ -9,9 +9,11 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { Button } from '../../src/components/Button';
+import { Icon, type IconName } from '../../src/components/Icon';
 import { Screen } from '../../src/components/Screen';
 import { StarRating } from '../../src/components/StarRating';
 import { AppText, Heading2, MutedText } from '../../src/components/Typography';
@@ -23,6 +25,14 @@ import { colors, radii, spacing } from '../../src/theme/tokens';
 import { rubroLabel } from '../../src/lib/business-rubros';
 import { computeEstadoHorario } from '../../src/lib/business-hours-status';
 
+const RUBRO_ICON: Record<string, IconName> = {
+  paseador: 'paw',
+  cuidador: 'paw',
+  veterinaria: 'store',
+  peluqueria: 'scissors',
+  petshop: 'store',
+};
+
 export default function PerfilPublicoEmpresaScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -32,6 +42,7 @@ export default function PerfilPublicoEmpresaScreen() {
   const { data: miResena } = useMyReviewForBusiness(id);
   const logEvent = useLogBusinessEvent();
   const [fotoActiva, setFotoActiva] = useState(0);
+  const [favorito, setFavorito] = useState(false);
 
   useEffect(() => {
     if (id) logEvent.mutate({ businessId: id, tipo: 'vista' });
@@ -99,17 +110,24 @@ export default function PerfilPublicoEmpresaScreen() {
               ))}
             </ScrollView>
           ) : (
-            <View style={styles.bannerPlaceholder} />
+            <LinearGradient
+              colors={['#2E6F5E', '#1F4E42']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.bannerPlaceholder}
+            >
+              <Icon name={RUBRO_ICON[business.rubro] ?? 'store'} size={52} color="rgba(251,248,244,0.55)" strokeWidth={1.5} />
+            </LinearGradient>
           )}
 
           <Pressable onPress={() => router.back()} style={[styles.headerButton, styles.backButton]}>
-            <AppText variant="h3">‹</AppText>
+            <Icon name="chevronLeft" size={18} color={colors.white} strokeWidth={2} />
           </Pressable>
           <Pressable
-            onPress={handleCompartir}
+            onPress={() => setFavorito((v) => !v)}
             style={[styles.headerButton, styles.shareButton]}
           >
-            <AppText variant="h3">↗</AppText>
+            <Icon name="heart" size={17} color={favorito ? colors.gold : colors.white} strokeWidth={2} />
           </Pressable>
 
           {business.fotos.length > 1 && (
@@ -122,12 +140,13 @@ export default function PerfilPublicoEmpresaScreen() {
               ))}
             </View>
           )}
-
-          <View style={styles.avatar} />
         </View>
 
         <View style={styles.body}>
-          <Heading2>{business.nombre}</Heading2>
+          <View style={styles.nameRow}>
+            <Heading2>{business.nombre}</Heading2>
+            <Icon name="checkBadge" size={16} color={colors.primary} />
+          </View>
           <View style={styles.metaRow}>
             <StarRating promedio={stats.promedio} total={stats.total} />
             <MutedText>· {rubroLabel(business.rubro)}</MutedText>
@@ -138,9 +157,9 @@ export default function PerfilPublicoEmpresaScreen() {
           </MutedText>
 
           <View style={styles.actions}>
-            <ActionButton label="Llamar" onPress={handleLlamar} disabled={!business.telefono} />
-            <ActionButton label="Cómo llegar" onPress={handleComoLlegar} />
-            <ActionButton label="Compartir" onPress={handleCompartir} />
+            <ActionButton icon="phone" label="Llamar" onPress={handleLlamar} disabled={!business.telefono} />
+            <ActionButton icon="navigation" label="Cómo llegar" onPress={handleComoLlegar} />
+            <ActionButton icon="share" label="Compartir" onPress={handleCompartir} />
           </View>
 
           {business.servicios.length > 0 && (
@@ -181,7 +200,16 @@ export default function PerfilPublicoEmpresaScreen() {
                     </AppText>
                   </View>
                   <AppText variant="bodyMedium">{review.profiles?.nombre ?? 'Usuario'}</AppText>
-                  <AppText style={styles.reviewStars}>{'★'.repeat(review.calificacion)}</AppText>
+                  <View style={styles.reviewStars}>
+                    {Array.from({ length: 5 }).map((_, index) => (
+                      <Icon
+                        key={index}
+                        name={index < review.calificacion ? 'star' : 'starOutline'}
+                        size={11}
+                        color={colors.gold}
+                      />
+                    ))}
+                  </View>
                 </View>
                 {review.comentario && <MutedText>{review.comentario}</MutedText>}
                 {review.respuesta_empresa && (
@@ -199,9 +227,15 @@ export default function PerfilPublicoEmpresaScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
-        <View style={styles.footerAvatar} />
+        {business.turnos_habilitado && (
+          <Pressable style={styles.footerIconButton} onPress={handleLlamar} disabled={!business.telefono}>
+            <Icon name="phone" size={20} color={colors.textDark} strokeWidth={1.8} />
+          </Pressable>
+        )}
         <Button
           label={business.turnos_habilitado ? 'Reservar turno' : 'Llamar para reservar'}
+          variant="dark"
+          icon={business.turnos_habilitado ? undefined : 'phone'}
           onPress={handleReservar}
           style={styles.footerButton}
         />
@@ -211,10 +245,12 @@ export default function PerfilPublicoEmpresaScreen() {
 }
 
 function ActionButton({
+  icon,
   label,
   onPress,
   disabled,
 }: {
+  icon: IconName;
   label: string;
   onPress: () => void;
   disabled?: boolean;
@@ -225,7 +261,7 @@ function ActionButton({
       disabled={disabled}
       style={[styles.actionButton, disabled && styles.actionButtonDisabled]}
     >
-      <View style={styles.actionIcon} />
+      <Icon name={icon} size={17} color={colors.primary} strokeWidth={2} />
       <MutedText style={styles.actionLabel}>{label}</MutedText>
     </Pressable>
   );
@@ -252,15 +288,16 @@ const styles = StyleSheet.create({
   bannerPlaceholder: {
     width: '100%',
     height: 168,
-    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerButton: {
     position: 'absolute',
-    top: spacing.md,
+    top: 48,
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: colors.white,
+    backgroundColor: 'rgba(30,40,35,0.35)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -286,21 +323,15 @@ const styles = StyleSheet.create({
   dotActive: {
     backgroundColor: colors.white,
   },
-  avatar: {
-    position: 'absolute',
-    bottom: -26,
-    alignSelf: 'center',
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: colors.primary,
-    borderWidth: 3,
-    borderColor: colors.cream,
-  },
   body: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
+    paddingTop: spacing.md,
     gap: 4,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
   },
   metaRow: {
     flexDirection: 'row',
@@ -326,20 +357,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.xs,
     backgroundColor: colors.white,
-    borderRadius: radii.lg,
-    paddingVertical: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 14,
+    paddingVertical: spacing.sm + 2,
   },
   actionButtonDisabled: {
     opacity: 0.4,
   },
-  actionIcon: {
-    width: 17,
-    height: 17,
-    borderRadius: 9,
-    backgroundColor: colors.primaryLight,
-  },
   actionLabel: {
-    fontSize: 12,
+    fontSize: 11,
+    fontWeight: '600',
+    color: colors.primary,
   },
   section: {
     marginTop: spacing.lg,
@@ -392,13 +421,13 @@ const styles = StyleSheet.create({
   },
   reviewStars: {
     marginLeft: 'auto',
-    color: colors.gold,
-    fontSize: 12,
+    flexDirection: 'row',
+    gap: 1,
   },
   respuesta: {
-    backgroundColor: colors.primaryLight,
+    backgroundColor: '#F1EEE7',
     borderRadius: radii.md,
-    padding: spacing.sm,
+    padding: spacing.sm + 2,
     gap: 2,
   },
   respuestaTitulo: {
@@ -408,17 +437,20 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.sm + 2,
     padding: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.border,
-    backgroundColor: colors.cream,
+    backgroundColor: colors.white,
   },
-  footerAvatar: {
+  footerIconButton: {
     width: 52,
     height: 52,
-    borderRadius: 26,
-    backgroundColor: colors.primaryLight,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   footerButton: {
     flex: 1,

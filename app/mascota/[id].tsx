@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
+import { Icon } from '../../src/components/Icon';
 import { Screen } from '../../src/components/Screen';
 import { AppText, MutedText } from '../../src/components/Typography';
 import { VaccineStatusBadge } from '../../src/components/VaccineStatusBadge';
@@ -42,20 +43,22 @@ export default function PerfilMascotaDetalleScreen() {
     <Screen style={styles.screen}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} hitSlop={12}>
-          <AppText variant="h3">‹</AppText>
+          <Icon name="chevronLeft" size={22} color={colors.textDark} strokeWidth={2} />
         </Pressable>
         <AppText variant="bodyMedium" style={styles.headerTitle}>
           Mi mascota
         </AppText>
         <Pressable onPress={() => router.push(`/mascota/${id}/editar`)} hitSlop={12}>
-          <MutedText>Editar</MutedText>
+          <Icon name="gridSettings" size={20} color={colors.textDark} strokeWidth={1.8} />
         </Pressable>
       </View>
 
       {pet.foto_url ? (
         <Image source={{ uri: pet.foto_url }} style={styles.avatar} />
       ) : (
-        <View style={styles.avatarPlaceholder} />
+        <View style={styles.avatarPlaceholder}>
+          <Icon name="paw" size={46} color={colors.primary} strokeWidth={1.6} />
+        </View>
       )}
 
       <AppText variant="h2" style={styles.name}>
@@ -79,13 +82,16 @@ export default function PerfilMascotaDetalleScreen() {
         <View style={styles.carnet}>
           {proximaVacuna?.proxima_fecha && (
             <View style={styles.alert}>
-              <MutedText style={styles.alertText}>
+              <Icon name="alertCircle" size={20} color={colors.amber} strokeWidth={1.8} />
+              <AppText variant="bodyMuted" style={styles.alertText}>
+                La vacuna{' '}
+                <AppText variant="bodyMedium" style={styles.alertTextBold}>
+                  {proximaVacuna.nombre.toLowerCase()}
+                </AppText>{' '}
                 {computeVaccineStatus(proximaVacuna.proxima_fecha) === 'vencida'
-                  ? `La vacuna ${proximaVacuna.nombre.toLowerCase()} está vencida`
-                  : `La vacuna ${proximaVacuna.nombre.toLowerCase()} vence en ${diasHasta(
-                      proximaVacuna.proxima_fecha
-                    )} días`}
-              </MutedText>
+                  ? 'está vencida'
+                  : `vence en ${diasHasta(proximaVacuna.proxima_fecha)} días`}
+              </AppText>
             </View>
           )}
 
@@ -137,14 +143,13 @@ function TabButton({
   onPress: () => void;
 }) {
   return (
-    <Pressable onPress={onPress} style={styles.tabButton}>
+    <Pressable onPress={onPress} style={[styles.tabButton, active && styles.tabButtonActive]}>
       <AppText
         variant={active ? 'bodyMedium' : 'bodyMuted'}
         style={active ? styles.tabActive : undefined}
       >
         {label}
       </AppText>
-      {active && <View style={styles.tabIndicator} />}
     </Pressable>
   );
 }
@@ -158,7 +163,7 @@ function VaccineRow({ vaccine, petId }: { vaccine: Vaccine; petId: string }) {
       style={styles.vaccineRow}
       onPress={() => router.push(`/mascota/${petId}/vacuna/${vaccine.id}`)}
     >
-      <View style={styles.vaccineDot} />
+      <Icon name="syringe" size={20} color={colors.primary} strokeWidth={1.8} />
       <View style={styles.vaccineText}>
         <AppText variant="bodyMedium">{vaccine.nombre}</AppText>
         <MutedText style={styles.vaccineDate}>
@@ -201,6 +206,15 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primaryLight,
     alignSelf: 'center',
     marginTop: spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: colors.white,
+    shadowColor: 'rgba(30,40,35,0.5)',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 2,
   },
   name: {
     textAlign: 'center',
@@ -215,61 +229,68 @@ const styles = StyleSheet.create({
   },
   chip: {
     backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border,
     borderRadius: radii.pill,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.md,
+    paddingVertical: 5,
+    paddingHorizontal: 12,
   },
   chipText: {
-    fontSize: 11,
+    fontSize: 12,
   },
   tabs: {
     flexDirection: 'row',
-    gap: spacing.lg,
+    gap: 22,
     paddingHorizontal: spacing.lg,
     marginTop: spacing.lg,
   },
   tabButton: {
-    paddingBottom: spacing.sm,
+    paddingBottom: 10,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  tabButtonActive: {
+    borderBottomColor: colors.primary,
   },
   tabActive: {
     color: colors.primary,
   },
-  tabIndicator: {
-    marginTop: spacing.xs,
-    height: 2,
-    width: 50,
-    backgroundColor: colors.primary,
-  },
   tabsDivider: {
     height: 1,
     backgroundColor: colors.border,
+    marginTop: -1,
   },
   carnet: {
     padding: spacing.lg,
     gap: spacing.md,
   },
   alert: {
-    backgroundColor: colors.amberBg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm + 4,
+    backgroundColor: 'rgba(232,163,61,0.14)',
     borderRadius: radii.lg,
-    padding: spacing.md,
+    padding: 14,
   },
   alertText: {
+    flex: 1,
     color: colors.amber,
-    fontSize: 12.5,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  alertTextBold: {
+    color: colors.amber,
+    fontSize: 13,
   },
   vaccineRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
     backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border,
     borderRadius: radii.lg,
     padding: spacing.md,
-  },
-  vaccineDot: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: colors.primaryLight,
   },
   vaccineText: {
     flex: 1,

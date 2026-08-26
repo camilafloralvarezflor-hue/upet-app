@@ -2,9 +2,10 @@ import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { Button } from '../../src/components/Button';
+import { Icon, type IconName } from '../../src/components/Icon';
 import { Screen } from '../../src/components/Screen';
 import { SignOutButton } from '../../src/components/SignOutButton';
-import { AppText, Heading1, Heading2, Heading3, MutedText } from '../../src/components/Typography';
+import { AppText, Heading1, Heading2, MutedText } from '../../src/components/Typography';
 import { useMyBusiness, useUpdateBusiness } from '../../src/hooks/useBusiness';
 import { useBusinessStats } from '../../src/hooks/useBusinessStats';
 import { useProfile } from '../../src/hooks/useProfile';
@@ -56,41 +57,60 @@ export default function PanelEmpresaScreen() {
           <MutedText>Hola, {profile?.nombre}</MutedText>
           <Heading2>{business.nombre}</Heading2>
         </View>
-        <View style={styles.headerIcon} />
+        <View style={styles.headerIcon}>
+          <Icon name="bell" size={17} color={colors.textDark} strokeWidth={1.8} />
+        </View>
       </View>
 
       <View style={styles.statsRow}>
-        <StatCard valor={stats?.vistasEstaSemana ?? 0} label="Vistas esta semana" />
-        <StatCard valor={stats?.contactos ?? 0} label="Contactos" />
+        <StatCard icon="eye" valor={stats?.vistasEstaSemana ?? 0} label="Vistas esta semana" />
+        <StatCard icon="chatBubble" valor={stats?.contactos ?? 0} label="Contactos" />
         <StatCard
+          icon="star"
           valor={reviewStats.total > 0 ? reviewStats.promedio.toFixed(1) : '—'}
           label={`${reviewStats.total} reseñas`}
         />
       </View>
 
       <View style={styles.boostCard}>
-        <View style={styles.boostIcon} />
-        {boostVigente ? (
-          <>
-            <Heading3>Tu perfil está destacado</Heading3>
-            <MutedText style={styles.boostSubtitle}>
-              Vigente hasta el{' '}
-              {new Date(business.boost_vence as string).toLocaleDateString('es-AR')}.
-            </MutedText>
-          </>
-        ) : (
-          <>
-            <Heading3>Aparecé primero en tu zona</Heading3>
-            <MutedText style={styles.boostSubtitle}>
-              Destacá tu perfil en los resultados de búsqueda.
-            </MutedText>
-            <Button
-              label={updateBusiness.isPending ? 'Activando…' : 'Destacar mi perfil'}
-              onPress={handleDestacar}
-              disabled={updateBusiness.isPending}
-              style={styles.boostButton}
-            />
-          </>
+        <View style={styles.boostCircle} pointerEvents="none" />
+        <View style={styles.boostContent}>
+          <View style={styles.boostIcon}>
+            <Icon name="trendingUp" size={19} color={colors.cream} strokeWidth={2} />
+          </View>
+          <View style={styles.boostTextBlock}>
+            {boostVigente ? (
+              <>
+                <AppText variant="bodyMedium" style={styles.boostTitle}>
+                  Tu perfil está destacado
+                </AppText>
+                <MutedText style={styles.boostSubtitle}>
+                  Vigente hasta el{' '}
+                  {new Date(business.boost_vence as string).toLocaleDateString('es-AR')}.
+                </MutedText>
+              </>
+            ) : (
+              <>
+                <AppText variant="bodyMedium" style={styles.boostTitle}>
+                  Aparecé primero en tu zona
+                </AppText>
+                <MutedText style={styles.boostSubtitle}>
+                  Destacá tu perfil en los resultados de búsqueda.
+                </MutedText>
+              </>
+            )}
+          </View>
+        </View>
+        {!boostVigente && (
+          <Pressable
+            onPress={handleDestacar}
+            disabled={updateBusiness.isPending}
+            style={styles.boostButton}
+          >
+            <AppText variant="bodyMedium" style={styles.boostButtonText}>
+              {updateBusiness.isPending ? 'Activando…' : 'Destacar mi perfil'}
+            </AppText>
+          </Pressable>
         )}
       </View>
 
@@ -112,7 +132,16 @@ export default function PanelEmpresaScreen() {
               </AppText>
             </View>
             <AppText variant="bodyMedium">{review.profiles?.nombre ?? 'Usuario'}</AppText>
-            <AppText style={styles.reviewStars}>{'★'.repeat(review.calificacion)}</AppText>
+            <View style={styles.reviewStars}>
+              {Array.from({ length: 5 }).map((_, index) => (
+                <Icon
+                  key={index}
+                  name={index < review.calificacion ? 'star' : 'starOutline'}
+                  size={11}
+                  color={colors.gold}
+                />
+              ))}
+            </View>
           </View>
           {review.comentario && <MutedText numberOfLines={2}>{review.comentario}</MutedText>}
           {!review.respuesta_empresa && (
@@ -130,11 +159,26 @@ export default function PanelEmpresaScreen() {
   );
 }
 
-function StatCard({ valor, label }: { valor: string | number; label: string }) {
+function StatCard({
+  icon,
+  valor,
+  label,
+}: {
+  icon: IconName;
+  valor: string | number;
+  label: string;
+}) {
   return (
     <View style={styles.statCard}>
-      <View style={styles.statIcon} />
-      <Heading2>{valor}</Heading2>
+      <Icon
+        name={icon}
+        size={16}
+        color={icon === 'star' ? colors.gold : colors.textFaint}
+        strokeWidth={1.8}
+      />
+      <AppText variant="h2" style={styles.statValor}>
+        {valor}
+      </AppText>
       <MutedText style={styles.statLabel}>{label}</MutedText>
     </View>
   );
@@ -160,8 +204,12 @@ const styles = StyleSheet.create({
   headerIcon: {
     width: 38,
     height: 38,
-    borderRadius: radii.md,
+    borderRadius: 19,
     backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   statsRow: {
     flexDirection: 'row',
@@ -171,39 +219,72 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border,
     borderRadius: radii.lg,
-    padding: spacing.sm,
-    gap: 4,
+    padding: 12,
+    gap: 8,
   },
-  statIcon: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: colors.primaryLight,
+  statValor: {
+    fontSize: 19,
   },
   statLabel: {
-    fontSize: 11,
+    fontSize: 10.5,
+    marginTop: -4,
   },
   boostCard: {
-    backgroundColor: colors.white,
-    borderRadius: radii.lg,
-    padding: spacing.md,
+    backgroundColor: colors.textDark,
+    borderRadius: 18,
+    padding: spacing.md + 2,
     marginBottom: spacing.lg,
-    gap: spacing.xs,
     overflow: 'hidden',
+    position: 'relative',
+  },
+  boostCircle: {
+    position: 'absolute',
+    top: -30,
+    right: -24,
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    backgroundColor: 'rgba(46,111,94,0.35)',
+  },
+  boostContent: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm + 4,
   },
   boostIcon: {
     width: 38,
     height: 38,
-    borderRadius: radii.md,
-    backgroundColor: colors.primaryLight,
-    marginBottom: spacing.xs,
+    borderRadius: 11,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  boostTextBlock: {
+    flex: 1,
+    gap: 4,
+  },
+  boostTitle: {
+    color: colors.cream,
+    fontSize: 14.5,
   },
   boostSubtitle: {
-    marginBottom: spacing.xs,
+    color: '#B9C2BD',
+    fontSize: 12,
+    lineHeight: 18,
   },
   boostButton: {
-    marginTop: spacing.xs,
+    marginTop: 14,
+    backgroundColor: colors.cream,
+    borderRadius: 11,
+    padding: 11,
+    alignItems: 'center',
+  },
+  boostButtonText: {
+    color: colors.textDark,
+    fontSize: 13.5,
   },
   reviewsHeader: {
     flexDirection: 'row',
@@ -217,6 +298,8 @@ const styles = StyleSheet.create({
   },
   reviewCard: {
     backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border,
     borderRadius: radii.lg,
     padding: spacing.md,
     marginBottom: spacing.md,
@@ -237,8 +320,8 @@ const styles = StyleSheet.create({
   },
   reviewStars: {
     marginLeft: 'auto',
-    color: colors.gold,
-    fontSize: 12,
+    flexDirection: 'row',
+    gap: 1,
   },
   responderLink: {
     color: colors.primary,

@@ -17,6 +17,9 @@ para una fase futura (ver `src/lib/business-rubros.ts`).
 - **Mapas/geolocalización**: react-native-maps + Google Maps.
 - **Datos remotos**: TanStack Query.
 - **Notificaciones push**: Expo Notifications (agregado en la Etapa 8, junto con turnos).
+- **Íconos**: set propio de íconos de línea (`src/components/Icon.tsx`) sobre
+  `react-native-svg`, calcado 1:1 de los mockups de diseño en vez de una
+  librería de íconos genérica.
 
 ## Setup
 
@@ -165,6 +168,37 @@ recorrido en vivo del paseo).
   exacto de foreground service (Android) y del indicador de ubicación en
   background (iOS) solo se puede validar en un build nativo, no en este
   entorno.
+
+## Implementación de mockups (Claude Design)
+
+Las 8 pantallas principales (Registro, Perfil de mascota, Búsqueda, Emergencias,
+Alta de empresa, Perfil público, Panel y Turnos) se re-implementaron pixel a
+pixel a partir de un set de mockups de diseño, reemplazando los placeholders
+de etapas anteriores por los colores, tipografía, espaciados y componentes
+exactos del diseño:
+
+- Set de íconos propio (`src/components/Icon.tsx`) con los mismos trazos SVG
+  de los mockups (pata, tienda, jeringa, ubicación, teléfono, estrella, etc.),
+  sobre `react-native-svg`.
+- `Button` ahora tiene variante `dark` (fondo `#1E2823`) para los CTA
+  principales, que en el diseño no usan el verde primario.
+- `TextField` acepta un ícono inicial opcional (dirección, búsqueda).
+- Barra de tabs (dueño y empresa) rediseñada con píldora activa
+  ícono+etiqueta, igual que el mockup — se mantienen las mismas 4 tabs de cada
+  lado, sin agregar las tabs "Inicio" y "Perfil" que aparecen en el mockup
+  (no tienen pantalla propia en el diseño ni en el modelo de datos todavía).
+- Búsqueda cercana suma el toggle Lista/Mapa del mockup con un `MapView` real
+  (marcadores por negocio).
+- Ficha pública de empresa: header con gradiente (`expo-linear-gradient`)
+  cuando no hay foto, insignia de verificado, corazón de favorito (solo
+  visual/local, no hay tabla de favoritos todavía).
+- El botón "+" del header de Turnos (empresa) del mockup no se implementó:
+  no hay flujo para que una empresa cargue un turno manualmente, y agregarlo
+  hubiera significado inventar una función fuera del alcance pedido.
+- Los mockups muestran "Veterinaria" como rubro de ejemplo en el alta y en los
+  chips de búsqueda; se mantuvo la restricción ya vigente de
+  `RUBROS_ACTIVOS` (solo Paseador/Cuidador) en vez de reactivar Veterinaria,
+  respetando el cambio de producto "Reenfoque a Paseo/Cuidado" de más arriba.
 
 ## Diseño
 

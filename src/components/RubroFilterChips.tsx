@@ -40,7 +40,7 @@ function Chip({
 }) {
   return (
     <Pressable onPress={onPress} style={[styles.chip, selected && styles.chipSelected]}>
-      <AppText variant="bodyMuted" style={selected && styles.chipTextSelected}>
+      <AppText variant={selected ? 'bodyMedium' : 'bodyMuted'} style={selected && styles.chipTextSelected}>
         {label}
       </AppText>
     </Pressable>
@@ -61,8 +61,8 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   chipSelected: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
+    backgroundColor: colors.textDark,
+    borderColor: colors.textDark,
   },
   chipTextSelected: {
     color: colors.white,

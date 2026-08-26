@@ -3,6 +3,7 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } fro
 import { useRouter } from 'expo-router';
 
 import { Button } from '../../src/components/Button';
+import { Icon } from '../../src/components/Icon';
 import { Screen } from '../../src/components/Screen';
 import { TextField } from '../../src/components/TextField';
 import { AppText, Heading1, MutedText } from '../../src/components/Typography';
@@ -22,7 +23,7 @@ import { proximosDias } from '../../src/lib/turnos-slots';
 import { colors, radii, spacing } from '../../src/theme/tokens';
 import type { AppointmentStatus } from '../../src/lib/database.types';
 
-const DIA_LABEL = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+const DIA_LABEL = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
 const ESTADO_META: Record<AppointmentStatus, { label: string; bg: string; text: string }> = {
   pendiente: { label: 'Pendiente', bg: '#FCEFDA', text: '#7A5416' },
@@ -100,12 +101,19 @@ export default function TurnosEmpresaScreen() {
     setMonto('');
   };
 
+  const esHoy = diaSeleccionado.toDateString() === new Date().toDateString();
+
   return (
     <Screen>
-      <Heading1 style={styles.title}>Turnos</Heading1>
-      <MutedText style={styles.subtitle}>
-        {diaSeleccionado.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
-      </MutedText>
+      <View style={styles.header}>
+        <View>
+          <Heading1 style={styles.title}>Turnos</Heading1>
+          <MutedText style={styles.subtitle}>
+            {esHoy ? 'Hoy, ' : ''}
+            {diaSeleccionado.toLocaleDateString('es-AR', { day: 'numeric', month: 'long' })}
+          </MutedText>
+        </View>
+      </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.diasRow}>
         {dias.map((dia) => {
@@ -116,7 +124,7 @@ export default function TurnosEmpresaScreen() {
               onPress={() => setDiaSeleccionado(dia)}
               style={[styles.diaChip, selected && styles.diaChipSelected]}
             >
-              <MutedText style={selected && styles.diaChipTextSelected}>
+              <MutedText style={[styles.diaLabel, selected && styles.diaChipTextSelected]}>
                 {DIA_LABEL[dia.getDay()]}
               </MutedText>
               <AppText variant="bodyMedium" style={selected && styles.diaChipTextSelected}>
@@ -191,29 +199,32 @@ function TurnoCard({
       : null;
 
   return (
-    <View style={styles.card}>
+    <View style={styles.row}>
       <MutedText style={styles.hora}>
         {new Date(turno.fecha_hora).toLocaleTimeString('es-AR', {
           hour: '2-digit',
           minute: '2-digit',
         })}
       </MutedText>
-      <View style={styles.cardBody}>
-        <View style={styles.cardIcon} />
-        <View style={styles.cardText}>
-          <AppText variant="bodyMedium">
-            {turno.pets?.nombre ?? 'Mascota'} · {turno.profiles?.nombre ?? 'Dueño'}
-          </AppText>
-          {turno.tipo_servicio && <MutedText>{turno.tipo_servicio}</MutedText>}
+      <View style={styles.card}>
+        <View style={styles.cardBody}>
+          <View style={styles.cardIcon}>
+            <Icon name="paw" size={18} color={colors.primary} strokeWidth={1.8} />
+          </View>
+          <View style={styles.cardText}>
+            <AppText variant="bodyMedium">
+              {turno.pets?.nombre ?? 'Mascota'} · {turno.profiles?.nombre ?? 'Dueño'}
+            </AppText>
+            {turno.tipo_servicio && <MutedText>{turno.tipo_servicio}</MutedText>}
+          </View>
+          <View style={[styles.badge, { backgroundColor: meta.bg }]}>
+            <AppText variant="caption" style={{ color: meta.text, fontWeight: '700' }}>
+              {meta.label}
+            </AppText>
+          </View>
         </View>
-        <View style={[styles.badge, { backgroundColor: meta.bg }]}>
-          <AppText variant="caption" style={{ color: meta.text, fontWeight: '700' }}>
-            {meta.label}
-          </AppText>
-        </View>
-      </View>
 
-      {turno.estado === 'pendiente' && (
+        {turno.estado === 'pendiente' && (
         <View style={styles.actions}>
           <Button label="Confirmar" onPress={onConfirmar} style={styles.actionButton} />
           <Button label="Cancelar" variant="danger" onPress={onCancelar} style={styles.actionButton} />
@@ -262,13 +273,14 @@ function TurnoCard({
         </View>
       )}
 
-      {desglose && (
-        <View style={styles.desglose}>
-          <MutedText>Cobraste ${turno.monto?.toFixed(2)}</MutedText>
-          <MutedText>Comisión Mawis ({turno.comision_pct}%): ${desglose.comision.toFixed(2)}</MutedText>
-          <AppText variant="bodyMedium">Neto para vos: ${desglose.neto.toFixed(2)}</AppText>
-        </View>
-      )}
+        {desglose && (
+          <View style={styles.desglose}>
+            <MutedText>Cobraste ${turno.monto?.toFixed(2)}</MutedText>
+            <MutedText>Comisión Mawis ({turno.comision_pct}%): ${desglose.comision.toFixed(2)}</MutedText>
+            <AppText variant="bodyMedium">Neto para vos: ${desglose.neto.toFixed(2)}</AppText>
+          </View>
+        )}
+      </View>
     </View>
   );
 }
@@ -277,12 +289,18 @@ const styles = StyleSheet.create({
   loading: {
     marginTop: spacing.xl,
   },
-  title: {
+  header: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
     marginTop: spacing.xl,
   },
+  title: {
+    marginTop: 0,
+  },
   subtitle: {
+    marginTop: 2,
     marginBottom: spacing.md,
-    textTransform: 'capitalize',
   },
   aviso: {
     marginVertical: spacing.md,
@@ -293,31 +311,43 @@ const styles = StyleSheet.create({
   },
   diaChip: {
     alignItems: 'center',
-    gap: 2,
-    paddingVertical: spacing.sm,
+    gap: 4,
+    paddingVertical: 9,
     paddingHorizontal: spacing.md,
-    borderRadius: radii.md,
-    backgroundColor: colors.white,
-    marginRight: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderRadius: 12,
+    marginRight: spacing.xs,
   },
   diaChipSelected: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
+    backgroundColor: colors.textDark,
+  },
+  diaLabel: {
+    fontSize: 10.5,
   },
   diaChipTextSelected: {
-    color: colors.white,
+    color: colors.cream,
   },
-  card: {
-    backgroundColor: colors.white,
-    borderRadius: radii.lg,
-    padding: spacing.md,
-    marginBottom: spacing.md,
-    gap: spacing.sm,
+  row: {
+    flexDirection: 'row',
+    gap: spacing.sm + 4,
+    marginBottom: spacing.sm + 2,
   },
   hora: {
-    fontSize: 12,
+    width: 44,
+    flexShrink: 0,
+    textAlign: 'right',
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: colors.textDark,
+    paddingTop: 14,
+  },
+  card: {
+    flex: 1,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.lg,
+    padding: spacing.md,
+    gap: spacing.sm,
   },
   cardBody: {
     flexDirection: 'row',
@@ -327,8 +357,10 @@ const styles = StyleSheet.create({
   cardIcon: {
     width: 38,
     height: 38,
-    borderRadius: radii.md,
+    borderRadius: 11,
     backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cardText: {
     flex: 1,

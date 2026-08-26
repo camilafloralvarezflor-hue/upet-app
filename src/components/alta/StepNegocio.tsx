@@ -2,6 +2,7 @@ import { Image, Pressable, StyleSheet, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
 import { AppSwitch } from '../AppSwitch';
+import { Icon } from '../Icon';
 import { TextField } from '../TextField';
 import { AppText, MutedText } from '../Typography';
 import { DIAS_SEMANA } from '../../lib/horarios';
@@ -54,7 +55,7 @@ export function StepNegocio({ form, onChange, onCambiarRubro }: StepNegocioProps
       <View style={styles.field}>
         <MutedText style={styles.label}>Rubro</MutedText>
         <View style={styles.rubroPill}>
-          <View style={styles.rubroIcon} />
+          <Icon name="store" size={16} color={colors.primary} strokeWidth={1.8} />
           <AppText variant="bodyMedium" style={styles.rubroLabel}>
             {form.rubro ? rubroLabel(form.rubro) : '—'}
           </AppText>
@@ -75,6 +76,7 @@ export function StepNegocio({ form, onChange, onCambiarRubro }: StepNegocioProps
 
       <TextField
         label="Dirección"
+        icon="locationPin"
         value={form.direccion}
         onChangeText={(direccion) => onChange({ direccion })}
         placeholder="Buscar dirección…"
@@ -124,7 +126,9 @@ export function StepNegocio({ form, onChange, onCambiarRubro }: StepNegocioProps
       </View>
 
       <View style={styles.turnosCard}>
-        <View style={styles.turnosIcon} />
+        <View style={styles.turnosIcon}>
+          <Icon name="calendar" size={17} color={colors.primary} strokeWidth={1.8} />
+        </View>
         <View style={styles.turnosText}>
           <AppText variant="bodyMedium">Turnos online</AppText>
           <MutedText style={styles.turnosSubtitle}>
@@ -148,9 +152,7 @@ export function StepNegocio({ form, onChange, onCambiarRubro }: StepNegocioProps
           ))}
           {form.fotosLocales.length < MAX_FOTOS && (
             <Pressable onPress={agregarFoto} style={styles.fotoAdd}>
-              <AppText variant="h3" style={styles.fotoAddPlus}>
-                +
-              </AppText>
+              <Icon name="camera" size={20} color={colors.textFaint} strokeWidth={1.8} />
             </Pressable>
           )}
         </View>
@@ -174,27 +176,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
     alignSelf: 'flex-start',
-    borderWidth: 1,
-    borderColor: colors.border,
     borderRadius: radii.pill,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    backgroundColor: colors.white,
-  },
-  rubroIcon: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: colors.primary,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: 14,
+    backgroundColor: colors.primaryLight,
   },
   rubroLabel: {
-    marginRight: spacing.sm,
+    color: colors.primary,
+    marginRight: 2,
   },
   cambiarLink: {
     color: colors.primary,
+    fontSize: 12,
+    textDecorationLine: 'underline',
   },
   horariosCard: {
     backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border,
     borderRadius: radii.lg,
     padding: spacing.md,
   },
@@ -224,14 +223,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border,
     borderRadius: radii.lg,
     padding: spacing.md,
   },
   turnosIcon: {
     width: 34,
     height: 34,
-    borderRadius: 12,
+    borderRadius: 10,
     backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   turnosText: {
     flex: 1,
@@ -256,14 +259,11 @@ const styles = StyleSheet.create({
   fotoAdd: {
     width: 64,
     height: 64,
-    borderRadius: radii.md,
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderRadius: 14,
+    borderWidth: 1.6,
+    borderStyle: 'dashed',
+    borderColor: '#C9C2B4',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  fotoAddPlus: {
-    color: colors.textFaint,
   },
 });

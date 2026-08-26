@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
+import { Icon } from '../src/components/Icon';
 import { Screen } from '../src/components/Screen';
 import { AppText, Heading1, MutedText } from '../src/components/Typography';
 import { colors, radii, spacing } from '../src/theme/tokens';
@@ -17,9 +18,10 @@ export default function RegistroScreen() {
   return (
     <Screen style={styles.screen}>
       <View style={styles.decorativeCircle} pointerEvents="none" />
+      <View style={styles.decorativeCircleGold} pointerEvents="none" />
 
       <View style={styles.logoRow}>
-        <View style={styles.logoDot} />
+        <Icon name="paw" size={30} color={colors.primary} strokeWidth={1.8} />
         <AppText variant="logo">Mawis</AppText>
       </View>
 
@@ -31,12 +33,14 @@ export default function RegistroScreen() {
       <View style={styles.cards}>
         <RoleCard
           variant="light"
+          icon="paw"
           label="Soy dueño de mascota"
           description="Registro gratis: encontrá paseadores y cuidadores"
           onPress={() => elegirRol('dueno')}
         />
         <RoleCard
           variant="dark"
+          icon="store"
           label="Soy paseador o cuidador"
           description="Registro gratis: ofrecé tus servicios de paseo y cuidado"
           onPress={() => elegirRol('empresa')}
@@ -44,7 +48,10 @@ export default function RegistroScreen() {
       </View>
 
       <Pressable style={styles.loginLink} onPress={() => router.push('/auth/login')} hitSlop={8}>
-        <MutedText style={styles.loginLinkText}>¿Ya tenés cuenta?  Iniciar sesión</MutedText>
+        <MutedText style={styles.loginLinkText}>¿Ya tenés cuenta? </MutedText>
+        <AppText variant="bodyMedium" style={styles.loginLinkAction}>
+          Iniciar sesión
+        </AppText>
       </Pressable>
     </Screen>
   );
@@ -52,11 +59,13 @@ export default function RegistroScreen() {
 
 function RoleCard({
   variant,
+  icon,
   label,
   description,
   onPress,
 }: {
   variant: 'light' | 'dark';
+  icon: 'paw' | 'store';
   label: string;
   description: string;
   onPress: () => void;
@@ -71,7 +80,9 @@ function RoleCard({
         pressed && styles.cardPressed,
       ]}
     >
-      <View style={[styles.cardIcon, isDark ? styles.cardIconDark : styles.cardIconLight]} />
+      <View style={[styles.cardIcon, isDark ? styles.cardIconDark : styles.cardIconLight]}>
+        <Icon name={icon} size={26} color={isDark ? colors.cream : colors.primary} strokeWidth={1.8} />
+      </View>
       <View style={styles.cardText}>
         <AppText variant="bodyMedium" style={isDark && styles.cardLabelDark}>
           {label}
@@ -80,6 +91,7 @@ function RoleCard({
           {description}
         </AppText>
       </View>
+      <Icon name="chevronRight" size={20} color={isDark ? '#B9C2BD' : colors.textFaint} strokeWidth={2} />
     </Pressable>
   );
 }
@@ -91,12 +103,21 @@ const styles = StyleSheet.create({
   },
   decorativeCircle: {
     position: 'absolute',
-    top: -70,
-    left: 250,
+    top: -90,
+    right: -70,
     width: 260,
     height: 260,
     borderRadius: 130,
     backgroundColor: colors.primaryLight,
+  },
+  decorativeCircleGold: {
+    position: 'absolute',
+    top: -20,
+    right: 64,
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    backgroundColor: 'rgba(232,163,61,0.14)',
   },
   logoRow: {
     flexDirection: 'row',
@@ -104,12 +125,6 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     marginTop: spacing.xl,
     marginLeft: spacing.lg,
-  },
-  logoDot: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: colors.primary,
   },
   title: {
     marginTop: spacing.lg,
@@ -133,9 +148,21 @@ const styles = StyleSheet.create({
   },
   cardLight: {
     backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border,
+    shadowColor: 'rgba(30,40,35,0.4)',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    elevation: 1,
   },
   cardDark: {
     backgroundColor: colors.textDark,
+    shadowColor: 'rgba(30,40,35,0.6)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 14,
+    elevation: 4,
   },
   cardPressed: {
     opacity: 0.85,
@@ -167,9 +194,14 @@ const styles = StyleSheet.create({
   loginLink: {
     marginTop: 'auto',
     marginBottom: spacing.xl,
-    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   loginLinkText: {
     fontSize: 13.5,
+  },
+  loginLinkAction: {
+    fontSize: 13.5,
+    color: colors.primary,
   },
 });

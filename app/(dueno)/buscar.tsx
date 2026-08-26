@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 
 import { BusinessCard } from '../../src/components/BusinessCard';
+import { Icon } from '../../src/components/Icon';
 import { RubroFilterChips } from '../../src/components/RubroFilterChips';
 import { Screen } from '../../src/components/Screen';
-import { Heading1, MutedText } from '../../src/components/Typography';
+import { AppText, Heading1, MutedText } from '../../src/components/Typography';
 import { useBusinesses } from '../../src/hooks/useBusinesses';
 import { useReviewStatsMap } from '../../src/hooks/useReviews';
 import { useUserLocation } from '../../src/hooks/useUserLocation';
@@ -24,6 +26,7 @@ export default function BuscarCercaScreen() {
   const [query, setQuery] = useState('');
   const [rubro, setRubro] = useState<string | null>(null);
   const [ciudad, setCiudad] = useState<string | null>(null);
+  const [vista, setVista] = useState<'lista' | 'mapa'>('lista');
 
   useEffect(() => {
     if (!coords) return;
@@ -57,7 +60,13 @@ export default function BuscarCercaScreen() {
 
   return (
     <Screen>
-      {ciudad && <MutedText style={styles.ubicacion}>📍 {ciudad}</MutedText>}
+      {ciudad && (
+        <View style={styles.ubicacionRow}>
+          <Icon name="locationPin" size={15} color={colors.primary} strokeWidth={2} />
+          <MutedText style={styles.ubicacionText}>{ciudad}</MutedText>
+          <Icon name="chevronDown" size={13} color={colors.textFaint} strokeWidth={2} />
+        </View>
+      )}
       {status === 'denied' && (
         <MutedText style={styles.ubicacion}>
           Activá la ubicación para ver la distancia a cada negocio.{' '}
@@ -69,13 +78,16 @@ export default function BuscarCercaScreen() {
 
       <Heading1 style={styles.title}>Cerca tuyo</Heading1>
 
-      <TextInput
-        value={query}
-        onChangeText={setQuery}
-        placeholder="Buscar paseadores, cuidadores…"
-        placeholderTextColor={colors.textFaint}
-        style={styles.searchBar}
-      />
+      <View style={styles.searchBar}>
+        <Icon name="search" size={18} color={colors.textFaint} strokeWidth={2} />
+        <TextInput
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Buscar paseadores, cuidadores…"
+          placeholderTextColor={colors.textFaint}
+          style={styles.searchInput}
+        />
+      </View>
 
       <RubroFilterChips value={rubro} onChange={setRubro} />
 
@@ -85,26 +97,81 @@ export default function BuscarCercaScreen() {
         </View>
       ) : (
         <>
-          <MutedText style={styles.count}>{resultados.length} resultados</MutedText>
-          <FlatList
-            data={resultados}
-            keyExtractor={(item) => item.business.id}
-            contentContainerStyle={styles.list}
-            renderItem={({ item }) => (
-              <BusinessCard
-                business={item.business}
-                distanciaKm={item.distancia}
-                ratingPromedio={reviewStats?.get(item.business.id)?.promedio ?? 0}
-                ratingTotal={reviewStats?.get(item.business.id)?.total ?? 0}
-                onPress={() => router.push(`/negocio/${item.business.id}`)}
-              />
-            )}
-            ListEmptyComponent={
-              <MutedText style={styles.empty}>
-                No encontramos negocios para esta búsqueda.
-              </MutedText>
-            }
-          />
+          <View style={styles.resultsRow}>
+            <MutedText style={styles.count}>
+              <AppText variant="bodyMedium" style={styles.countNumber}>
+                {resultados.length}
+              </AppText>{' '}
+              resultados
+            </MutedText>
+            <View style={styles.toggle}>
+              <Pressable
+                onPress={() => setVista('lista')}
+                style={[styles.toggleOption, vista === 'lista' && styles.toggleOptionActive]}
+              >
+                <AppText
+                  variant={vista === 'lista' ? 'bodyMedium' : 'bodyMuted'}
+                  style={[styles.toggleText, vista === 'lista' && styles.toggleTextActive]}
+                >
+                  Lista
+                </AppText>
+              </Pressable>
+              <Pressable
+                onPress={() => setVista('mapa')}
+                style={[styles.toggleOption, vista === 'mapa' && styles.toggleOptionActive]}
+              >
+                <AppText
+                  variant={vista === 'mapa' ? 'bodyMedium' : 'bodyMuted'}
+                  style={[styles.toggleText, vista === 'mapa' && styles.toggleTextActive]}
+                >
+                  Mapa
+                </AppText>
+              </Pressable>
+            </View>
+          </View>
+
+          {vista === 'lista' ? (
+            <FlatList
+              data={resultados}
+              keyExtractor={(item) => item.business.id}
+              contentContainerStyle={styles.list}
+              renderItem={({ item }) => (
+                <BusinessCard
+                  business={item.business}
+                  distanciaKm={item.distancia}
+                  ratingPromedio={reviewStats?.get(item.business.id)?.promedio ?? 0}
+                  ratingTotal={reviewStats?.get(item.business.id)?.total ?? 0}
+                  onPress={() => router.push(`/negocio/${item.business.id}`)}
+                />
+              )}
+              ListEmptyComponent={
+                <MutedText style={styles.empty}>
+                  No encontramos negocios para esta búsqueda.
+                </MutedText>
+              }
+            />
+          ) : (
+            <MapView
+              style={styles.map}
+              initialRegion={{
+                latitude: coords?.lat ?? resultados[0]?.business.lat ?? -31.42,
+                longitude: coords?.lng ?? resultados[0]?.business.lng ?? -64.5,
+                latitudeDelta: 0.05,
+                longitudeDelta: 0.05,
+              }}
+            >
+              {resultados
+                .filter((item) => item.business.lat != null && item.business.lng != null)
+                .map((item) => (
+                  <Marker
+                    key={item.business.id}
+                    coordinate={{ latitude: item.business.lat!, longitude: item.business.lng! }}
+                    title={item.business.nombre}
+                    onPress={() => router.push(`/negocio/${item.business.id}`)}
+                  />
+                ))}
+            </MapView>
+          )}
         </>
       )}
     </Screen>
@@ -116,6 +183,15 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: spacing.md,
   },
+  ubicacionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: spacing.md,
+  },
+  ubicacionText: {
+    fontSize: 12.5,
+  },
   retry: {
     color: colors.primary,
   },
@@ -124,27 +200,73 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radii.lg,
+    borderRadius: 14,
     paddingVertical: spacing.sm + 4,
     paddingHorizontal: spacing.md,
-    fontFamily: fonts.body,
-    fontSize: 15,
-    color: colors.textDark,
     backgroundColor: colors.white,
     marginBottom: spacing.md,
+  },
+  searchInput: {
+    flex: 1,
+    fontFamily: fonts.body,
+    fontSize: 14,
+    color: colors.textDark,
   },
   loading: {
     marginTop: spacing.xl,
   },
-  count: {
+  resultsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginTop: spacing.md,
     marginBottom: spacing.sm,
+  },
+  count: {
+    fontSize: 13,
+  },
+  countNumber: {
+    color: colors.textDark,
+    fontSize: 13,
+  },
+  toggle: {
+    flexDirection: 'row',
+    backgroundColor: '#EFEBE3',
+    borderRadius: 10,
+    padding: 3,
+  },
+  toggleOption: {
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+  },
+  toggleOptionActive: {
+    backgroundColor: colors.white,
+    shadowColor: 'rgba(30,40,35,0.3)',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  toggleText: {
+    fontSize: 12,
+    color: colors.textFaint,
+  },
+  toggleTextActive: {
+    color: colors.textDark,
   },
   list: {
     gap: spacing.md,
     paddingBottom: spacing.md,
+  },
+  map: {
+    flex: 1,
+    borderRadius: radii.lg,
   },
   empty: {
     textAlign: 'center',

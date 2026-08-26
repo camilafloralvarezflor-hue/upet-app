@@ -1,5 +1,6 @@
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 
+import { Icon, type IconName } from './Icon';
 import { Heading3, MutedText } from './Typography';
 import { StarRating } from './StarRating';
 import { colors, radii, spacing } from '../theme/tokens';
@@ -7,6 +8,14 @@ import type { Business } from '../lib/database.types';
 import { rubroLabel } from '../lib/business-rubros';
 import { computeEstadoHorario } from '../lib/business-hours-status';
 import { formatDistancia } from '../lib/geo';
+
+const RUBRO_ICON: Record<string, IconName> = {
+  paseador: 'paw',
+  cuidador: 'paw',
+  veterinaria: 'store',
+  peluqueria: 'scissors',
+  petshop: 'store',
+};
 
 interface BusinessCardProps {
   business: Business;
@@ -33,11 +42,13 @@ export function BusinessCard({
       {business.fotos[0] ? (
         <Image source={{ uri: business.fotos[0] }} style={styles.photo} />
       ) : (
-        <View style={styles.photoPlaceholder} />
+        <View style={styles.photoPlaceholder}>
+          <Icon name={RUBRO_ICON[business.rubro] ?? 'store'} size={28} color={colors.primary} strokeWidth={1.7} />
+        </View>
       )}
       <View style={styles.info}>
         <Heading3 numberOfLines={1}>{business.nombre}</Heading3>
-        <MutedText>
+        <MutedText style={styles.subtitle}>
           {rubroLabel(business.rubro)}
           {distanciaKm != null ? ` · ${formatDistancia(distanciaKm)}` : ''}
         </MutedText>
@@ -58,8 +69,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.md,
     backgroundColor: colors.white,
-    borderRadius: radii.lg,
-    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 18,
+    padding: 14,
   },
   cardPressed: {
     opacity: 0.85,
@@ -67,30 +80,40 @@ const styles = StyleSheet.create({
   photo: {
     width: 62,
     height: 62,
-    borderRadius: radii.md,
+    borderRadius: 14,
   },
   photoPlaceholder: {
     width: 62,
     height: 62,
-    borderRadius: radii.md,
+    borderRadius: 14,
     backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   info: {
     flex: 1,
-    gap: 4,
+    gap: 2,
     justifyContent: 'center',
+  },
+  subtitle: {
+    fontSize: 12,
+    color: colors.textFaint,
   },
   bottomRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 2,
+    gap: 5,
+    marginTop: 6,
   },
   abierto: {
     color: colors.primary,
-    fontSize: 12,
+    fontSize: 11,
+    fontWeight: '600',
+    marginLeft: 6,
   },
   cerrado: {
-    fontSize: 12,
+    fontSize: 11,
+    fontWeight: '600',
+    marginLeft: 6,
   },
 });

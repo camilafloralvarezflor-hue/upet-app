@@ -1,6 +1,7 @@
 import { ActivityIndicator, Linking, StyleSheet, View } from 'react-native';
 
 import { Button } from '../../src/components/Button';
+import { Icon } from '../../src/components/Icon';
 import { Screen } from '../../src/components/Screen';
 import { AppText, Heading1, Heading3, MutedText } from '../../src/components/Typography';
 import { useEmergencyContacts } from '../../src/hooks/useEmergencyContacts';
@@ -27,6 +28,9 @@ export default function EmergenciasScreen() {
       <MutedText style={styles.subtitle}>Guardias veterinarias 24 hs cerca tuyo</MutedText>
 
       <View style={styles.banner}>
+        <View style={styles.bannerIcon}>
+          <Icon name="shieldAlert" size={19} color={colors.white} strokeWidth={2} />
+        </View>
         <MutedText style={styles.bannerText}>
           ¿Es una urgencia? Elegí una guardia y llamá directo, sin buscar en internet.
         </MutedText>
@@ -82,15 +86,20 @@ function EmergencyCard({
         )}
       </View>
 
-      {contacto.especialidad && <MutedText>{contacto.especialidad}</MutedText>}
+      {contacto.especialidad && <MutedText style={styles.especialidad}>{contacto.especialidad}</MutedText>}
 
-      <MutedText>
-        {contacto.direccion}
-        {distancia != null ? ` · ${formatDistancia(distancia)}` : ''}
-      </MutedText>
+      <View style={styles.direccionRow}>
+        <Icon name="locationPin" size={14} color={colors.textFaint} strokeWidth={2} />
+        <MutedText style={styles.direccionText}>
+          {contacto.direccion}
+          {distancia != null ? ` · ${formatDistancia(distancia)}` : ''}
+        </MutedText>
+      </View>
 
       <Button
         label="Llamar ahora"
+        variant="dark"
+        icon="phone"
         onPress={() => Linking.openURL(`tel:${contacto.telefono}`)}
         style={styles.callButton}
       />
@@ -107,14 +116,27 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   banner: {
-    backgroundColor: colors.primaryLight,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm + 4,
+    backgroundColor: colors.dangerBg,
     borderRadius: radii.lg,
     padding: spacing.md,
     marginBottom: spacing.lg,
   },
+  bannerIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: colors.dangerText,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   bannerText: {
-    color: colors.primary,
+    flex: 1,
+    color: '#7A2E27',
     fontSize: 13,
+    lineHeight: 19,
   },
   loading: {
     marginTop: spacing.xl,
@@ -125,10 +147,23 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border,
     borderRadius: radii.lg,
     padding: spacing.md,
     gap: spacing.xs,
     marginBottom: spacing.md,
+  },
+  especialidad: {
+    fontSize: 12.5,
+  },
+  direccionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  direccionText: {
+    fontSize: 12,
   },
   cardHeader: {
     flexDirection: 'row',

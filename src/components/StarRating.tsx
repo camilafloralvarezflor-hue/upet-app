@@ -1,7 +1,8 @@
 import { StyleSheet, View } from 'react-native';
 
+import { Icon } from './Icon';
 import { AppText, MutedText } from './Typography';
-import { colors, spacing } from '../theme/tokens';
+import { colors } from '../theme/tokens';
 
 export function StarRating({ promedio, total }: { promedio: number; total: number }) {
   if (total === 0) {
@@ -10,10 +11,11 @@ export function StarRating({ promedio, total }: { promedio: number; total: numbe
 
   return (
     <View style={styles.row}>
-      <AppText variant="bodyMedium" style={styles.star}>
-        ★ {promedio.toFixed(1)}
+      <Icon name="star" size={13} color={colors.gold} />
+      <AppText variant="bodyMedium" style={styles.rating}>
+        {promedio.toFixed(1)}
       </AppText>
-      <MutedText>({total})</MutedText>
+      <MutedText style={styles.total}>({total})</MutedText>
     </View>
   );
 }
@@ -22,10 +24,13 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.xs,
+    gap: 5,
   },
-  star: {
-    color: colors.gold,
+  rating: {
+    fontSize: 12.5,
+  },
+  total: {
+    fontSize: 12,
   },
   sinResenas: {
     fontSize: 12.5,

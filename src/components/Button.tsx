@@ -1,16 +1,18 @@
-import { Pressable, StyleSheet, Text, ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native';
 
+import { Icon, type IconName } from './Icon';
 import { colors, fonts, radii, spacing } from '../theme/tokens';
 
 interface ButtonProps {
   label: string;
   onPress?: () => void;
-  variant?: 'primary' | 'secondary' | 'gold' | 'danger';
+  variant?: 'primary' | 'dark' | 'secondary' | 'gold' | 'danger';
+  icon?: IconName;
   disabled?: boolean;
   style?: ViewStyle;
 }
 
-export function Button({ label, onPress, variant = 'primary', disabled, style }: ButtonProps) {
+export function Button({ label, onPress, variant = 'primary', icon, disabled, style }: ButtonProps) {
   const variantStyle = variantStyles[variant];
   return (
     <Pressable
@@ -24,7 +26,10 @@ export function Button({ label, onPress, variant = 'primary', disabled, style }:
         style,
       ]}
     >
-      <Text style={[styles.label, variantStyle.label]}>{label}</Text>
+      <View style={styles.content}>
+        {icon && <Icon name={icon} size={17} color={variantStyle.label.color} strokeWidth={2} />}
+        <Text style={[styles.label, variantStyle.label]}>{label}</Text>
+      </View>
     </Pressable>
   );
 }
@@ -36,6 +41,10 @@ const variantStyles: Record<
   primary: {
     container: { backgroundColor: colors.primary },
     label: { color: colors.white },
+  },
+  dark: {
+    container: { backgroundColor: colors.textDark },
+    label: { color: colors.cream },
   },
   secondary: {
     container: {
@@ -61,11 +70,16 @@ const variantStyles: Record<
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: radii.md,
+    borderRadius: 14,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  content: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
   },
   label: {
     fontFamily: fonts.bodyMedium,
