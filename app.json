@@ -12,6 +12,9 @@
       "supportsTablet": true,
       "config": {
         "googleMapsApiKey": "$GOOGLE_MAPS_IOS_API_KEY"
+      },
+      "infoPlist": {
+        "UIBackgroundModes": ["location"]
       }
     },
     "android": {
@@ -46,7 +49,11 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Mawis usa tu ubicación para mostrarte paseadores y cuidadores cercanos, y para compartir el recorrido del paseo en vivo."
+          "locationAlwaysAndWhenInUsePermission": "Mawis usa tu ubicación para mostrarte paseadores y cuidadores cercanos.",
+          "locationAlwaysPermission": "Mawis comparte tu ubicación con el dueño mientras el paseo está en curso, incluso con la app en segundo plano.",
+          "locationWhenInUsePermission": "Mawis usa tu ubicación para mostrarte paseadores y cuidadores cercanos.",
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
         }
       ],
       [

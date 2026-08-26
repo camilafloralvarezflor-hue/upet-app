@@ -6,7 +6,7 @@ import { Screen } from '../../../src/components/Screen';
 import { AppText, Heading2, MutedText } from '../../../src/components/Typography';
 import { useAppointment } from '../../../src/hooks/useAppointments';
 import { useProfile } from '../../../src/hooks/useProfile';
-import { useWalkLocationPublisher, useWalkTrail } from '../../../src/hooks/useWalkTracking';
+import { useTrackingActivoLocal, useWalkTrail } from '../../../src/hooks/useWalkTracking';
 import { colors, radii, spacing } from '../../../src/theme/tokens';
 
 export default function TurnoEnVivoScreen() {
@@ -36,7 +36,7 @@ export default function TurnoEnVivoScreen() {
       </Pressable>
 
       {esPaseador ? (
-        <VistaPaseador appointmentId={turno.id} enCurso={turno.estado === 'en_curso'} />
+        <VistaPaseador enCurso={turno.estado === 'en_curso'} />
       ) : (
         <VistaDueno appointmentId={turno.id} enCurso={turno.estado === 'en_curso'} petName={turno.pets?.nombre} />
       )}
@@ -44,8 +44,8 @@ export default function TurnoEnVivoScreen() {
   );
 }
 
-function VistaPaseador({ appointmentId, enCurso }: { appointmentId: string; enCurso: boolean }) {
-  const { compartiendo, error } = useWalkLocationPublisher(appointmentId, enCurso);
+function VistaPaseador({ enCurso }: { enCurso: boolean }) {
+  const trackingLocal = useTrackingActivoLocal();
 
   return (
     <View style={styles.publisherBody}>
@@ -54,16 +54,15 @@ function VistaPaseador({ appointmentId, enCurso }: { appointmentId: string; enCu
       </Heading2>
       {enCurso ? (
         <>
-          <View style={[styles.dot, compartiendo && styles.dotActive]} />
+          <View style={[styles.dot, trackingLocal && styles.dotActive]} />
           <MutedText style={styles.centrado}>
-            {compartiendo
-              ? 'Estamos compartiendo tu ubicación en vivo con el dueño.'
-              : 'Activando la ubicación…'}
+            {trackingLocal
+              ? 'Estamos compartiendo tu ubicación en vivo con el dueño, aunque cierres o minimices la app.'
+              : 'El tracking se activó desde la pantalla de Turnos al iniciar este paseo.'}
           </MutedText>
-          {error && <MutedText style={styles.error}>{error}</MutedText>}
           <MutedText style={styles.centrado}>
-            Mantené esta pantalla abierta mientras dure el paseo. Podés finalizarlo desde la
-            pantalla de Turnos.
+            Podés cerrar esta pantalla tranquilo — el tracking sigue funcionando solo. Finalizalo
+            desde la pantalla de Turnos cuando termine el paseo.
           </MutedText>
         </>
       ) : (

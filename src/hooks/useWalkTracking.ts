@@ -1,76 +1,30 @@
-import { useEffect, useRef, useState } from 'react';
-import * as Location from 'expo-location';
+import { useEffect, useState } from 'react';
 
 import { supabase } from '../lib/supabase';
 import type { WalkLocation } from '../lib/database.types';
-
-const INTERVALO_MS = 8000;
-const DISTANCIA_MIN_METROS = 15;
+import { estaTrackingActivo } from '../lib/background-location-task';
 
 /**
- * Lado paseador: mientras `activo` es true (el turno está en_curso y esta
- * pantalla sigue abierta), pide permiso de ubicación en foreground y publica
- * la posición a walk_locations cada pocos segundos. Al dejar de estar activo
- * (paseo finalizado/cancelado, o se sale de la pantalla) corta el tracking.
- *
- * Alcance: solo foreground. Si el paseador manda la app a segundo plano se
- * corta la publicación — habilitar tracking en background requeriría
- * permisos adicionales (expo-location background + TaskManager) que no
- * están activados en este MVP.
+ * Lado paseador: solo consulta si el tracking en segundo plano sigue activo
+ * en este dispositivo. Arrancar/parar la publicación real vive en
+ * `iniciarTrackingEnSegundoPlano` / `detenerTrackingEnSegundoPlano`
+ * (background-location-task.ts), disparado desde las acciones de "Iniciar
+ * paseo" / "Finalizar paseo" — no depende de que esta pantalla siga montada.
  */
-export function useWalkLocationPublisher(appointmentId: string, activo: boolean) {
-  const [compartiendo, setCompartiendo] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const watcherRef = useRef<Location.LocationSubscription | null>(null);
+export function useTrackingActivoLocal() {
+  const [activo, setActivo] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (!activo) {
-      watcherRef.current?.remove();
-      watcherRef.current = null;
-      setCompartiendo(false);
-      return;
-    }
-
-    let cancelado = false;
-
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setError('Necesitamos tu ubicación para compartir el recorrido con el dueño.');
-        return;
-      }
-
-      const watcher = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.High,
-          timeInterval: INTERVALO_MS,
-          distanceInterval: DISTANCIA_MIN_METROS,
-        },
-        (position) => {
-          supabase.from('walk_locations').insert({
-            appointment_id: appointmentId,
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-        }
-      );
-
-      if (cancelado) {
-        watcher.remove();
-        return;
-      }
-      watcherRef.current = watcher;
-      setCompartiendo(true);
-    })();
-
+    let vivo = true;
+    estaTrackingActivo().then((valor) => {
+      if (vivo) setActivo(valor);
+    });
     return () => {
-      cancelado = true;
-      watcherRef.current?.remove();
-      watcherRef.current = null;
+      vivo = false;
     };
-  }, [activo, appointmentId]);
+  }, []);
 
-  return { compartiendo, error };
+  return activo;
 }
 
 /**

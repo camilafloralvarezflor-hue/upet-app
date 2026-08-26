@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { Button } from '../../src/components/Button';
@@ -13,6 +13,10 @@ import {
   useUpdateAppointmentStatus,
   type AppointmentWithDetalle,
 } from '../../src/hooks/useAppointments';
+import {
+  detenerTrackingEnSegundoPlano,
+  iniciarTrackingEnSegundoPlano,
+} from '../../src/lib/background-location-task';
 import { calcularNeto } from '../../src/lib/comision';
 import { proximosDias } from '../../src/lib/turnos-slots';
 import { colors, radii, spacing } from '../../src/theme/tokens';
@@ -73,10 +77,25 @@ export default function TurnosEmpresaScreen() {
     );
   }
 
+  const handleIniciarPaseo = async (appointmentId: string) => {
+    const resultado = await iniciarTrackingEnSegundoPlano(appointmentId);
+    if (!resultado.ok) {
+      Alert.alert(
+        'No pudimos activar tu ubicación',
+        resultado.motivo === 'foreground_denegado'
+          ? 'Necesitamos permiso de ubicación para compartir el recorrido con el dueño.'
+          : 'Para que el dueño te vea en el mapa incluso con el celular bloqueado, activá "Permitir siempre" en Ajustes > Mawis > Ubicación.'
+      );
+      return;
+    }
+    updateStatus.mutate({ appointmentId, estado: 'en_curso' });
+  };
+
   const handleFinalizar = async (appointmentId: string) => {
     const montoNumero = Number(monto.replace(',', '.'));
     if (!montoNumero || montoNumero <= 0) return;
     await finalizarServicio.mutateAsync({ appointmentId, monto: montoNumero });
+    await detenerTrackingEnSegundoPlano();
     setFinalizandoId(null);
     setMonto('');
   };
@@ -122,7 +141,7 @@ export default function TurnosEmpresaScreen() {
             onMontoChange={setMonto}
             onConfirmar={() => updateStatus.mutate({ appointmentId: turno.id, estado: 'confirmado' })}
             onCancelar={() => updateStatus.mutate({ appointmentId: turno.id, estado: 'cancelado' })}
-            onIniciar={() => updateStatus.mutate({ appointmentId: turno.id, estado: 'en_curso' })}
+            onIniciar={() => handleIniciarPaseo(turno.id)}
             onVerRecorrido={() => router.push(`/turno/${turno.id}/en-vivo`)}
             onEmpezarFinalizar={() => {
               setFinalizandoId(turno.id);

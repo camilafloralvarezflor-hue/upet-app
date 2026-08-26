@@ -10,6 +10,11 @@ import { AuthProvider, useSession } from '../src/lib/auth-context';
 import { queryClient } from '../src/lib/query-client';
 import { RouteGuard } from '../src/components/RouteGuard';
 import { colors } from '../src/theme/tokens';
+// Registra la tarea de ubicación en segundo plano apenas arranca la app
+// (incluso si el SO la relanza en background) — debe importarse temprano,
+// a nivel de módulo, para que TaskManager.defineTask ya esté declarado
+// antes de que pueda llegar un evento de ubicación.
+import '../src/lib/background-location-task';
 
 SplashScreen.preventAutoHideAsync();
 

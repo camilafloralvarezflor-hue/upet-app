@@ -54,6 +54,17 @@ para una fase futura (ver `src/lib/business-rubros.ts`).
    npx expo start
    ```
 
+   **Ojo con el tracking en vivo**: el resto de la app funciona en Expo Go,
+   pero la ubicación en segundo plano (`expo-location` background +
+   `expo-task-manager`) **no funciona en Expo Go** — hace falta un
+   development build:
+
+   ```bash
+   npx expo run:ios      # o npx expo run:android
+   # o, sin Mac / para probar en un dispositivo real:
+   eas build --profile development --platform ios
+   ```
+
 ## Estructura
 
 ```
@@ -84,12 +95,17 @@ src/
   lib/turnos-slots.ts    Genera horarios disponibles para reservar un turno
   lib/comision.ts        % de comisión de la plataforma (configurable) + cálculo del neto
   lib/push-notifications.ts  Registro y envío de notificaciones push (Expo)
+  lib/background-location-task.ts  Tracking en segundo plano (TaskManager):
+                         arranca/para la publicación de ubicación del paseador,
+                         sigue funcionando con la app minimizada o el celular
+                         bloqueado
   lib/database.types.ts  Tipos TS del modelo de datos
   lib/query-client.ts    QueryClient de TanStack Query
   hooks/                 usePets, useVaccines, useProfile, useBusiness(es),
                          useReviews, useUserLocation, useEmergencyContacts,
                          useAppointments (agenda + cobro), useBusinessStats,
-                         useWalkTracking (publicar/mirar el recorrido en vivo)
+                         useWalkTracking (useWalkTrail: lado dueño, mira el
+                         recorrido por Realtime)
   components/            UI compartida (Screen, Typography, Button, PetForm,
                          BusinessCard, StarRating, RubroFilterChips, etc.)
   components/alta/       Pasos del wizard de alta de empresa
@@ -130,14 +146,25 @@ recorrido en vivo del paseo).
   el `comision_pct` vigente en ese momento en el propio turno. **No hay
   procesador de pagos real conectado todavía** — ver el `TODO(pagos)` en
   `src/lib/comision.ts`.
-- **Tracking en vivo**: mientras un turno está `en_curso`,
-  `useWalkLocationPublisher` (lado paseador) publica su ubicación a
-  `walk_locations` cada ~8 s, y `useWalkTrail` (lado dueño) la recibe por
-  Supabase Realtime y la dibuja en un mapa (`app/turno/[id]/en-vivo.tsx`).
-  El tracking es **solo en foreground**: si el paseador manda la app a
-  segundo plano se corta: habilitar ubicación en background requeriría
-  permisos adicionales (`expo-location` background + `TaskManager`) que no
-  están activados en este MVP.
+- **Tracking en vivo, estilo Uber (en segundo plano)**: al tocar "Iniciar
+  paseo" (Turnos, lado empresa), `iniciarTrackingEnSegundoPlano` pide
+  permiso de ubicación "siempre" y arranca `Location.startLocationUpdatesAsync`
+  con una tarea de `expo-task-manager` — sigue publicando a `walk_locations`
+  cada ~8 s / 15 m aunque el paseador **minimice la app o bloquee el
+  celular**, sin depender de que ninguna pantalla siga abierta. Del lado
+  dueño, `useWalkTrail` recibe esas posiciones por Supabase Realtime y las
+  dibuja en un mapa (`app/turno/[id]/en-vivo.tsx`), con la tab nueva **"Mis
+  turnos"** como entrada. El tracking se corta al finalizar el paseo
+  (`detenerTrackingEnSegundoPlano`) o al cerrar sesión.
+
+  Requiere permiso de ubicación "Always"/"Permitir siempre" (si el usuario
+  solo concede "mientras se usa la app", se avisa y no arranca) y **un
+  development build** — Expo Go no soporta `startLocationUpdatesAsync` en
+  segundo plano (se agregaron `expo-task-manager` y `expo-dev-client`; ver
+  Setup). Pendiente de probar en dispositivos reales: el comportamiento
+  exacto de foreground service (Android) y del indicador de ubicación en
+  background (iOS) solo se puede validar en un build nativo, no en este
+  entorno.
 
 ## Diseño
 
