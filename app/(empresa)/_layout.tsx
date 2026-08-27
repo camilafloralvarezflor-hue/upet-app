@@ -35,6 +35,7 @@ export default function EmpresaLayout() {
       />
       <Tabs.Screen name="alta" options={{ href: null }} />
       <Tabs.Screen name="verificacion" options={{ href: null }} />
+      <Tabs.Screen name="ganancias" options={{ href: null }} />
     </Tabs>
   );
 }

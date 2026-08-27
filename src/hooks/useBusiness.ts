@@ -14,6 +14,7 @@ export type BusinessInput = Omit<
   | 'boost_activo'
   | 'boost_vence'
   | 'cbu_alias'
+  | 'disponibilidad'
 >;
 
 async function fetchMyBusiness(ownerId: string): Promise<Business | null> {
@@ -70,6 +71,7 @@ export function useUpdateBusiness(id: string) {
         fotos?: string[];
         boost_activo?: boolean;
         boost_vence?: string | null;
+        disponibilidad?: Business['disponibilidad'];
       }
     ) => {
       const { data, error } = await supabase

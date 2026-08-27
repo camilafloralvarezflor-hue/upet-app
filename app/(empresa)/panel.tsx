@@ -72,6 +72,16 @@ export default function PanelEmpresaScreen() {
         <Icon name="chevronRight" size={16} color={colors.textFaint} strokeWidth={2} />
       </Pressable>
 
+      <Pressable onPress={() => router.push('/(empresa)/ganancias')} style={styles.verificacionRow}>
+        <View style={styles.verificacionIcon}>
+          <Icon name="trendingUp" size={16} color={colors.brand700} strokeWidth={2} />
+        </View>
+        <AppText variant="bodyMedium" style={styles.verificacionText}>
+          Ganancias y disponibilidad
+        </AppText>
+        <Icon name="chevronRight" size={16} color={colors.textFaint} strokeWidth={2} />
+      </Pressable>
+
       <View style={styles.statsRow}>
         <StatCard icon="eye" valor={stats?.vistasEstaSemana ?? 0} label="Vistas esta semana" />
         <StatCard icon="chatBubble" valor={stats?.contactos ?? 0} label="Contactos" />

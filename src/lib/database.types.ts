@@ -75,6 +75,7 @@ export interface Business {
   boost_activo: boolean;
   boost_vence: string | null;
   cbu_alias: string | null;
+  disponibilidad: { mananas: boolean; tardes: boolean; finde: boolean };
   created_at: string;
   updated_at: string;
 }
