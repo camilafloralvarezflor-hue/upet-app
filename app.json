@@ -1,0 +1,82 @@
+{
+  "expo": {
+    "name": "Mawis",
+    "slug": "mawis-app",
+    "scheme": "mawis",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "config": {
+        "googleMapsApiKey": "$GOOGLE_MAPS_IOS_API_KEY"
+      },
+      "infoPlist": {
+        "UIBackgroundModes": ["location"]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#EAF3F0",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "config": {
+        "googleMaps": {
+          "apiKey": "$GOOGLE_MAPS_ANDROID_API_KEY"
+        }
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FBF8F4",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Mawis usa tu ubicación para mostrarte paseadores y cuidadores cercanos.",
+          "locationAlwaysPermission": "Mawis comparte tu ubicación con el dueño mientras el paseo está en curso, incluso con la app en segundo plano.",
+          "locationWhenInUsePermission": "Mawis usa tu ubicación para mostrarte paseadores y cuidadores cercanos.",
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Mawis necesita acceso a tus fotos para que puedas subir la foto de tu mascota."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#2E6F5E"
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Mawis usa la cámara para escanear el código de check-in del paseador."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
