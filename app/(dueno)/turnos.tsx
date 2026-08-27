@@ -1,6 +1,7 @@
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
+import { Button } from '../../src/components/Button';
 import { Screen } from '../../src/components/Screen';
 import { AppText, Heading1, Heading3, MutedText } from '../../src/components/Typography';
 import { useMyAppointments } from '../../src/hooks/useAppointments';
@@ -68,6 +69,14 @@ export default function MisTurnosScreen() {
                   Ver recorrido en vivo →
                 </AppText>
               )}
+              {turno.estado === 'confirmado' && (
+                <Button
+                  label="Escanear código del paseador"
+                  variant="secondary"
+                  onPress={() => router.push(`/turno/${turno.id}/escanear`)}
+                  style={styles.escanearButton}
+                />
+              )}
             </Pressable>
           );
         })
@@ -111,6 +120,9 @@ const styles = StyleSheet.create({
   },
   verEnVivo: {
     color: colors.primary,
+    marginTop: spacing.xs,
+  },
+  escanearButton: {
     marginTop: spacing.xs,
   },
 });

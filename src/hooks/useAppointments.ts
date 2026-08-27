@@ -240,3 +240,68 @@ export function useMyAppointments() {
     enabled: !!ownerId,
   });
 }
+
+function generarCodigoCheckin() {
+  const alfabeto = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const parte = (n: number) =>
+    Array.from({ length: n }, () => alfabeto[Math.floor(Math.random() * alfabeto.length)]).join('');
+  return `MW-${parte(4)}-${parte(2)}`;
+}
+
+/** Lado paseador: genera (o reusa) el código de check-in de este turno. */
+export function useIniciarCheckin(appointmentId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!appointmentId) throw new Error('Falta el turno.');
+      const { data: actual, error: errorLectura } = await supabase
+        .from('appointments')
+        .select('codigo_checkin')
+        .eq('id', appointmentId)
+        .single();
+      if (errorLectura) throw errorLectura;
+      if (actual.codigo_checkin) return actual.codigo_checkin as string;
+
+      const codigo = generarCodigoCheckin();
+      const { error } = await supabase
+        .from('appointments')
+        .update({ codigo_checkin: codigo })
+        .eq('id', appointmentId);
+      if (error) throw error;
+      return codigo;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointment', appointmentId] });
+    },
+  });
+}
+
+/** Lado dueño: valida el código escaneado y arranca el paseo. */
+export function useConfirmarCheckin(appointmentId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (codigoEscaneado: string) => {
+      if (!appointmentId) throw new Error('Falta el turno.');
+      const { data: turno, error: errorLectura } = await supabase
+        .from('appointments')
+        .select('codigo_checkin, estado')
+        .eq('id', appointmentId)
+        .single();
+      if (errorLectura) throw errorLectura;
+      if (turno.estado !== 'confirmado') throw new Error('Este turno no está listo para arrancar.');
+      if (turno.codigo_checkin !== codigoEscaneado) throw new Error('El código no coincide.');
+
+      const { error } = await supabase
+        .from('appointments')
+        .update({ estado: 'en_curso', checkin_en: new Date().toISOString() })
+        .eq('id', appointmentId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointment', appointmentId] });
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+    },
+  });
+}
