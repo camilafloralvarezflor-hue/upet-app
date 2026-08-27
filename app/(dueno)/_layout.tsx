@@ -48,6 +48,7 @@ export default function DuenoLayout() {
           ),
         }}
       />
+      <Tabs.Screen name="pagos" options={{ href: null }} />
     </Tabs>
   );
 }

@@ -2,6 +2,7 @@ import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { Button } from '../../src/components/Button';
+import { Icon } from '../../src/components/Icon';
 import { Screen } from '../../src/components/Screen';
 import { AppText, Heading1, Heading3, MutedText } from '../../src/components/Typography';
 import { useMyAppointments } from '../../src/hooks/useAppointments';
@@ -22,7 +23,13 @@ export default function MisTurnosScreen() {
 
   return (
     <Screen>
-      <Heading1 style={styles.title}>Mis turnos</Heading1>
+      <View style={styles.headerRow}>
+        <Heading1 style={styles.title}>Mis turnos</Heading1>
+        <Pressable onPress={() => router.push('/(dueno)/pagos')} style={styles.pagosLink} hitSlop={8}>
+          <Icon name="trendingUp" size={15} color={colors.brand700} strokeWidth={2} />
+          <MutedText style={styles.pagosLinkText}>Pagos</MutedText>
+        </Pressable>
+      </View>
 
       {isLoading ? (
         <View style={styles.loading}>
@@ -86,9 +93,31 @@ export default function MisTurnosScreen() {
 }
 
 const styles = StyleSheet.create({
-  title: {
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginTop: spacing.xl,
     marginBottom: spacing.lg,
+  },
+  title: {
+    marginTop: 0,
+    marginBottom: 0,
+  },
+  pagosLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.pill,
+    paddingVertical: spacing.xs + 2,
+    paddingHorizontal: spacing.sm + 4,
+  },
+  pagosLinkText: {
+    fontSize: 12.5,
+    color: colors.brand700,
   },
   loading: {
     marginTop: spacing.xl,
