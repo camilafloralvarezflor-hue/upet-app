@@ -20,6 +20,7 @@ export type AppointmentWithDetalle = Appointment & {
 export type AppointmentWithNegocio = Appointment & {
   pets: { nombre: string } | null;
   businesses: { nombre: string; owner_id: string } | null;
+  profiles: { nombre: string } | null;
 };
 
 function rangoDelDia(dia: Date) {
@@ -202,7 +203,7 @@ export function useFinalizarServicio(businessId: string | undefined) {
 async function fetchAppointment(id: string): Promise<AppointmentWithNegocio> {
   const { data, error } = await supabase
     .from('appointments')
-    .select('*, pets(nombre), businesses(nombre, owner_id)')
+    .select('*, pets(nombre), businesses(nombre, owner_id), profiles(nombre)')
     .eq('id', id)
     .single();
   if (error) throw error;
@@ -222,7 +223,7 @@ export function useAppointment(id: string | undefined) {
 async function fetchMyAppointments(ownerId: string): Promise<AppointmentWithNegocio[]> {
   const { data, error } = await supabase
     .from('appointments')
-    .select('*, pets(nombre), businesses(nombre, owner_id)')
+    .select('*, pets(nombre), businesses(nombre, owner_id), profiles(nombre)')
     .eq('owner_id', ownerId)
     .order('fecha_hora', { ascending: false });
   if (error) throw error;

@@ -2,6 +2,7 @@ import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
+import { Icon } from '../../../src/components/Icon';
 import { Screen } from '../../../src/components/Screen';
 import { AppText, Heading2, MutedText } from '../../../src/components/Typography';
 import { useAppointment } from '../../../src/hooks/useAppointments';
@@ -33,6 +34,14 @@ export default function TurnoEnVivoScreen() {
         <AppText variant="h3" style={!esPaseador && styles.backFloatingText}>
           ‹
         </AppText>
+      </Pressable>
+
+      <Pressable
+        onPress={() => router.push(`/turno/${turno.id}/chat`)}
+        hitSlop={12}
+        style={esPaseador ? styles.chatButtonInline : styles.chatFloating}
+      >
+        <Icon name="chatBubble" size={18} color={esPaseador ? colors.brand900 : colors.white} strokeWidth={2.2} />
       </Pressable>
 
       {esPaseador ? (
@@ -199,6 +208,32 @@ const styles = StyleSheet.create({
   },
   backFloatingText: {
     color: colors.textDark,
+  },
+  chatFloating: {
+    position: 'absolute',
+    top: spacing.xl,
+    right: spacing.md,
+    zIndex: 1,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(32,30,29,0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chatButtonInline: {
+    position: 'absolute',
+    top: spacing.xl,
+    right: spacing.lg,
+    zIndex: 1,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border300,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   overlay: {
     position: 'absolute',
