@@ -127,26 +127,58 @@ export default function TurnosEmpresaScreen() {
       ) : turnos && turnos.length === 0 ? (
         <MutedText style={styles.aviso}>No tenés turnos para este día.</MutedText>
       ) : (
-        turnos?.map((turno) => (
-          <TurnoCard
-            key={turno.id}
-            turno={turno}
-            finalizando={finalizandoId === turno.id}
-            monto={monto}
-            onMontoChange={setMonto}
-            onConfirmar={() => updateStatus.mutate({ appointmentId: turno.id, estado: 'confirmado' })}
-            onCancelar={() => updateStatus.mutate({ appointmentId: turno.id, estado: 'cancelado' })}
-            onIniciar={() => handleIniciarPaseo(turno.id)}
-            onVerRecorrido={() => router.push(`/turno/${turno.id}/en-vivo`)}
-            onEmpezarFinalizar={() => {
-              setFinalizandoId(turno.id);
-              setMonto('');
-            }}
-            onCancelarFinalizar={() => setFinalizandoId(null)}
-            onConfirmarFinalizar={() => handleFinalizar(turno.id)}
-            guardando={finalizarServicio.isPending}
-          />
-        ))
+        (() => {
+          const gruposMostrados = new Set<string>();
+          return turnos?.map((turno) => {
+            if (turno.grupo_id) {
+              if (gruposMostrados.has(turno.grupo_id)) return null;
+              gruposMostrados.add(turno.grupo_id);
+              const cantidad = turnos.filter((t) => t.grupo_id === turno.grupo_id).length;
+              return (
+                <Pressable
+                  key={turno.grupo_id}
+                  style={styles.grupoCard}
+                  onPress={() => router.push(`/paseo-grupal/${turno.grupo_id}`)}
+                >
+                  <View style={styles.cardIcon}>
+                    <Icon name="paw" size={18} color={colors.brand700} strokeWidth={1.8} />
+                  </View>
+                  <View style={styles.cardText}>
+                    <AppText variant="bodyMedium">Paseo grupal · {cantidad} mascotas</AppText>
+                    <MutedText>
+                      {new Date(turno.fecha_hora).toLocaleTimeString('es-AR', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </MutedText>
+                  </View>
+                  <Icon name="chevronRight" size={18} color={colors.textFaint} strokeWidth={2} />
+                </Pressable>
+              );
+            }
+
+            return (
+              <TurnoCard
+                key={turno.id}
+                turno={turno}
+                finalizando={finalizandoId === turno.id}
+                monto={monto}
+                onMontoChange={setMonto}
+                onConfirmar={() => updateStatus.mutate({ appointmentId: turno.id, estado: 'confirmado' })}
+                onCancelar={() => updateStatus.mutate({ appointmentId: turno.id, estado: 'cancelado' })}
+                onIniciar={() => handleIniciarPaseo(turno.id)}
+                onVerRecorrido={() => router.push(`/turno/${turno.id}/en-vivo`)}
+                onEmpezarFinalizar={() => {
+                  setFinalizandoId(turno.id);
+                  setMonto('');
+                }}
+                onCancelarFinalizar={() => setFinalizandoId(null)}
+                onConfirmarFinalizar={() => handleFinalizar(turno.id)}
+                guardando={finalizarServicio.isPending}
+              />
+            );
+          });
+        })()
       )}
     </Screen>
   );
@@ -335,6 +367,17 @@ const styles = StyleSheet.create({
     borderRadius: radii.lg,
     padding: spacing.md,
     gap: spacing.sm,
+  },
+  grupoCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.lg,
+    padding: spacing.md,
+    marginBottom: spacing.sm + 2,
   },
   cardBody: {
     flexDirection: 'row',

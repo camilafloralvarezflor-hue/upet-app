@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from './supabase';
 
 export const WALK_LOCATION_TASK = 'mawis-walk-location-task';
-const TRACKING_APPOINTMENT_KEY = 'mawis:tracking-appointment-id';
+const TRACKING_APPOINTMENT_KEY = 'mawis:tracking-appointment-ids';
 
 // defineTask se ejecuta a nivel de módulo (se importa una sola vez, bien
 // arriba en app/_layout.tsx) para que quede registrada ANTES de que el SO
@@ -17,14 +17,20 @@ TaskManager.defineTask(WALK_LOCATION_TASK, async ({ data, error }) => {
   const ultima = locations?.[locations.length - 1];
   if (!ultima) return;
 
-  const appointmentId = await AsyncStorage.getItem(TRACKING_APPOINTMENT_KEY);
-  if (!appointmentId) return;
+  const guardado = await AsyncStorage.getItem(TRACKING_APPOINTMENT_KEY);
+  if (!guardado) return;
+  const appointmentIds: string[] = JSON.parse(guardado);
 
-  await supabase.from('walk_locations').insert({
-    appointment_id: appointmentId,
-    lat: ultima.coords.latitude,
-    lng: ultima.coords.longitude,
-  });
+  // Paseo grupal: una fila de walk_locations por turno del grupo, para que
+  // cada dueño vea el mismo recorrido a través de su propio turno (así
+  // sigue funcionando la RLS de "el dueño ve el recorrido de SU turno").
+  await supabase.from('walk_locations').insert(
+    appointmentIds.map((appointmentId) => ({
+      appointment_id: appointmentId,
+      lat: ultima.coords.latitude,
+      lng: ultima.coords.longitude,
+    }))
+  );
 });
 
 export type IniciarTrackingResultado =
@@ -40,7 +46,7 @@ export type IniciarTrackingResultado =
  * funciona desde la app de Expo Go.
  */
 export async function iniciarTrackingEnSegundoPlano(
-  appointmentId: string
+  appointmentIdOGrupo: string | string[]
 ): Promise<IniciarTrackingResultado> {
   const foreground = await Location.requestForegroundPermissionsAsync();
   if (foreground.status !== 'granted') {
@@ -57,7 +63,8 @@ export async function iniciarTrackingEnSegundoPlano(
     await Location.stopLocationUpdatesAsync(WALK_LOCATION_TASK);
   }
 
-  await AsyncStorage.setItem(TRACKING_APPOINTMENT_KEY, appointmentId);
+  const appointmentIds = Array.isArray(appointmentIdOGrupo) ? appointmentIdOGrupo : [appointmentIdOGrupo];
+  await AsyncStorage.setItem(TRACKING_APPOINTMENT_KEY, JSON.stringify(appointmentIds));
 
   await Location.startLocationUpdatesAsync(WALK_LOCATION_TASK, {
     accuracy: Location.Accuracy.High,

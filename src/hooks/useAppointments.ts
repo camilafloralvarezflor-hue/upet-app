@@ -305,3 +305,39 @@ export function useConfirmarCheckin(appointmentId: string | undefined) {
     },
   });
 }
+
+/** Lado paseador: los turnos que comparten un mismo paseo grupal. */
+export function useAppointmentsGrupo(grupoId: string | undefined) {
+  return useQuery({
+    queryKey: ['appointments', 'grupo', grupoId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('appointments')
+        .select('*, pets(nombre)')
+        .eq('grupo_id', grupoId as string)
+        .order('fecha_hora', { ascending: true });
+      if (error) throw error;
+      return data as unknown as AppointmentWithDetalle[];
+    },
+    enabled: !!grupoId,
+  });
+}
+
+/** Lado paseador: arranca de una todos los turnos de un paseo grupal. */
+export function useIniciarRondaGrupal(businessId: string | undefined) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (appointmentIds: string[]) => {
+      const { error } = await supabase
+        .from('appointments')
+        .update({ estado: 'en_curso' })
+        .in('id', appointmentIds);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments', businessId] });
+      queryClient.invalidateQueries({ queryKey: ['appointments', 'grupo'] });
+    },
+  });
+}

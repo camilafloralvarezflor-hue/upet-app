@@ -5,7 +5,7 @@ import { useSession } from '../lib/auth-context';
 import { ROLE_HOME } from '../lib/navigation';
 import { useProfile } from '../hooks/useProfile';
 
-const APP_GROUPS = ['(dueno)', '(empresa)', 'negocio', 'turno'];
+const APP_GROUPS = ['(dueno)', '(empresa)', 'negocio', 'turno', 'paseo-grupal'];
 
 export function RouteGuard({ children }: PropsWithChildren) {
   const { session, isLoading: sessionLoading } = useSession();
