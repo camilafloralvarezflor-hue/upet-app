@@ -62,6 +62,16 @@ export default function PanelEmpresaScreen() {
         </View>
       </View>
 
+      <Pressable onPress={() => router.push('/(empresa)/verificacion')} style={styles.verificacionRow}>
+        <View style={styles.verificacionIcon}>
+          <Icon name="shieldAlert" size={16} color={colors.brand700} strokeWidth={2} />
+        </View>
+        <AppText variant="bodyMedium" style={styles.verificacionText}>
+          Verificación de tu perfil
+        </AppText>
+        <Icon name="chevronRight" size={16} color={colors.textFaint} strokeWidth={2} />
+      </Pressable>
+
       <View style={styles.statsRow}>
         <StatCard icon="eye" valor={stats?.vistasEstaSemana ?? 0} label="Vistas esta semana" />
         <StatCard icon="chatBubble" valor={stats?.contactos ?? 0} label="Contactos" />
@@ -210,6 +220,28 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  verificacionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.lg,
+    padding: spacing.sm + 4,
+    marginBottom: spacing.md,
+  },
+  verificacionIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  verificacionText: {
+    flex: 1,
   },
   statsRow: {
     flexDirection: 'row',

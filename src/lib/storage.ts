@@ -34,3 +34,25 @@ export function uploadBusinessPhoto(
 ) {
   return uploadToBucket('businesses', `${ownerId}/${businessId}/${index}`, localUri);
 }
+
+/**
+ * Bucket privado (no público): a diferencia de uploadToBucket, no arma una
+ * URL pública — devuelve solo el path del archivo, que se guarda en
+ * walker_verifications.archivo_url para su revisión manual.
+ */
+export async function uploadVerificationPhoto(ownerId: string, tipo: string, localUri: string) {
+  const extension = localUri.split('.').pop()?.toLowerCase() ?? 'jpg';
+  const path = `${ownerId}/${tipo}.${extension}`;
+
+  const base64 = await FileSystem.readAsStringAsync(localUri, {
+    encoding: FileSystem.EncodingType.Base64,
+  });
+
+  const { error } = await supabase.storage.from('verificaciones').upload(path, decode(base64), {
+    contentType: `image/${extension === 'jpg' ? 'jpeg' : extension}`,
+    upsert: true,
+  });
+
+  if (error) throw error;
+  return path;
+}
